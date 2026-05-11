@@ -94,43 +94,43 @@ Multi-package monorepo layout (see `plan.md` → Project Structure):
 
 ### Contracts — Zod schemas + protocol version (`@domino/contracts`)
 
-- [ ] T038 [P] Implement `PROTOCOL_VERSION` constant (`'1.0.0'`) in `packages/contracts/src/version.ts`
-- [ ] T039 [P] Implement `RoomCode`, `SessionToken`, `MoveId` Zod schemas (regex-validated alphabets) in `packages/contracts/src/room.ts`
-- [ ] T040 [P] Implement view schemas (`PublicMatchView`, `PrivatePlayerView`, `PlayerSummary`, `LaidTile`, `MatchResult`, `Outcome`) in `packages/contracts/src/views.ts`
-- [ ] T041 [P] Implement error schemas (`ErrorCode` enum, `ErrorPayload`) in `packages/contracts/src/errors.ts`
-- [ ] T042 [P] Implement Socket.IO event schemas (every C→S and S→C payload from `contracts/socketio-events.md`) in `packages/contracts/src/events.ts`
-- [ ] T043 [P] Implement `SocketAuthPayload` schema in `packages/contracts/src/auth.ts`
-- [ ] T044 [P] Add `packages/contracts/src/index.ts` re-exporting all schemas + inferred TS types
-- [ ] T045 Write schema roundtrip tests (parse → serialize → parse equals original) plus forbidden-field rejection tests (server-to-client schemas must NOT accept payloads carrying other-seat hands or boneyard order) in `packages/contracts/tests/schemas.test.ts`
+- [X] T038 [P] Implement `PROTOCOL_VERSION` constant (`'1.0.0'`) in `packages/contracts/src/version.ts`
+- [X] T039 [P] Implement `RoomCode`, `SessionToken`, `MoveId` Zod schemas (regex-validated alphabets) in `packages/contracts/src/room.ts`
+- [X] T040 [P] Implement view schemas (`PublicMatchView`, `PrivatePlayerView`, `PlayerSummary`, `LaidTile`, `MatchResult`, `Outcome`) in `packages/contracts/src/views.ts`
+- [X] T041 [P] Implement error schemas (`ErrorCode` enum, `ErrorPayload`) in `packages/contracts/src/errors.ts`
+- [X] T042 [P] Implement Socket.IO event schemas (every C→S and S→C payload from `contracts/socketio-events.md`) in `packages/contracts/src/events.ts`
+- [X] T043 [P] Implement `SocketAuthPayload` schema in `packages/contracts/src/auth.ts`
+- [X] T044 [P] Add `packages/contracts/src/index.ts` re-exporting all schemas + inferred TS types
+- [X] T045 Write schema roundtrip tests (parse → serialize → parse equals original) plus forbidden-field rejection tests (server-to-client schemas must NOT accept payloads carrying other-seat hands or boneyard order) in `packages/contracts/tests/schemas.test.ts`
 
 ### Server bootstrap (`@domino/server`)
 
-- [ ] T046 [P] Implement `pino` logger factory in `packages/server/src/observability/logger.ts` (pretty in dev, JSON in prod)
-- [ ] T047 [P] Implement argv parsing for `--mode=online|lan` and `--port=N` in `packages/server/src/config.ts`
-- [ ] T048 [P] Implement Express app factory with CORS (allow all in v1) and JSON middleware in `packages/server/src/http.ts`
-- [ ] T049 [P] Implement `GET /health` returning `{ ok, protocolVersion, now, mode }` in `packages/server/src/http.ts`
-- [ ] T050 [P] Implement `POST /session` issuing 16-byte hex tokens in `packages/server/src/sessions/token.ts`
-- [ ] T051 Implement Socket.IO server attachment + auth handshake (validates `SocketAuthPayload`, disconnects on `PROTOCOL_MISMATCH`) in `packages/server/src/io.ts` — depends on T046, T048
-- [ ] T052 Implement process entry that wires all of the above and listens on `0.0.0.0:4123` in `packages/server/src/index.ts` — depends on T047, T051
-- [ ] T053 [P] Write server-bootstrap integration test (start app, hit `/health`, hit `/session`, open Socket.IO with valid + invalid `SocketAuthPayload`) in `packages/server/tests/integration/bootstrap.test.ts`
+- [X] T046 [P] Implement `pino` logger factory in `packages/server/src/observability/logger.ts` (pretty in dev, JSON in prod)
+- [X] T047 [P] Implement argv parsing for `--mode=online|lan` and `--port=N` in `packages/server/src/config.ts`
+- [X] T048 [P] Implement Express app factory with CORS (allow all in v1) and JSON middleware in `packages/server/src/http.ts`
+- [X] T049 [P] Implement `GET /health` returning `{ ok, protocolVersion, now, mode }` in `packages/server/src/http.ts`
+- [X] T050 [P] Implement `POST /session` issuing 16-byte hex tokens in `packages/server/src/sessions/token.ts`
+- [X] T051 Implement Socket.IO server attachment + auth handshake (validates `SocketAuthPayload`, disconnects on `PROTOCOL_MISMATCH`) in `packages/server/src/io.ts` — depends on T046, T048
+- [X] T052 Implement process entry that wires all of the above and listens on `0.0.0.0:4123` in `packages/server/src/index.ts` — depends on T047, T051
+- [X] T053 [P] Write server-bootstrap integration test (start app, hit `/health`, hit `/session`, open Socket.IO with valid + invalid `SocketAuthPayload`) in `packages/server/tests/integration/bootstrap.test.ts`
 
 ### Client bootstrap (`@domino/client`)
 
-- [ ] T054 [P] Configure Vite + React 18 + TS strict in `packages/client/vite.config.ts` + `packages/client/index.html` + `packages/client/src/main.tsx`
-- [ ] T055 [P] Configure Tailwind + design tokens in `packages/client/src/theme/tokens.ts` and `packages/client/tailwind.config.ts`, derived from `design/stitch_mesa_de_domin/brazilian_domino_aesthetic/DESIGN.md`
-- [ ] T056 [P] Implement Capacitor config in `packages/client/capacitor.config.ts` targeting `appId: br.com.domino.online`, `appName: Dominó Online`, server allowNavigation for LAN
-- [ ] T057 [P] Implement session-token persistence using `@capacitor/preferences` in `packages/client/src/net/session.ts` (read or create-and-store on first launch via `POST /session`)
-- [ ] T058 [P] Implement `BotecoButton` and `Avatar` primitive components in `packages/client/src/components/`
-- [ ] T059 [P] Implement `Tile` component (8px corner radius, ivory surface, navy pips) in `packages/client/src/components/Tile.tsx`
-- [ ] T060 [P] Implement `Board` component rendering laid chain with the two open ends visually distinguished, in `packages/client/src/components/Board.tsx`
-- [ ] T061 [P] Implement `Hand` component rendering current player's hand with legality highlighting (advisory, server is authoritative) in `packages/client/src/components/Hand.tsx`
-- [ ] T062 [P] Implement `TurnIndicator` component (shows current seat + countdown using `turnDeadlineMs`) in `packages/client/src/components/TurnIndicator.tsx`
-- [ ] T063 Implement `HomeScreen` rendering three primary actions ("Criar Partida", "Entrar em Partida", "Jogar Offline") plus a "Regras" link, per `design/stitch_mesa_de_domin/home_screen/code.html`, in `packages/client/src/app/HomeScreen.tsx` — depends on T058
-- [ ] T064 Implement `GameScreen` taking `gameView: PublicMatchView`, `mySeat: Seat`, `myHand: PrivatePlayerView`, `onIntent(intent)` props (data-source agnostic), in `packages/client/src/app/GameScreen.tsx` — depends on T060, T061, T062
-- [ ] T065 Implement `EndScreen` taking `result: MatchResult` + `onRematch` + `onHome` props, per `design/stitch_mesa_de_domin/fim_de_jogo/code.html`, in `packages/client/src/app/EndScreen.tsx` — depends on T058
-- [ ] T066 Implement `RulesScreen` (static content per `design/stitch_mesa_de_domin/regras/code.html`) in `packages/client/src/app/RulesScreen.tsx`
-- [ ] T067 Implement simple route/state switcher in `packages/client/src/main.tsx` that renders HomeScreen by default and exposes a `navigate(screen, props)` function — depends on T063, T064, T065, T066
-- [ ] T068 Initialize Capacitor Android project: `npx cap add android` from `packages/client/`, commit generated `packages/client/android/` skeleton
+- [X] T054 [P] Configure Vite + React 18 + TS strict in `packages/client/vite.config.ts` + `packages/client/index.html` + `packages/client/src/main.tsx`
+- [X] T055 [P] Configure Tailwind + design tokens in `packages/client/src/theme/tokens.ts` and `packages/client/tailwind.config.ts`, derived from `design/stitch_mesa_de_domin/brazilian_domino_aesthetic/DESIGN.md`
+- [X] T056 [P] Implement Capacitor config in `packages/client/capacitor.config.ts` targeting `appId: br.com.domino.online`, `appName: Dominó Online`, server allowNavigation for LAN
+- [X] T057 [P] Implement session-token persistence using `@capacitor/preferences` in `packages/client/src/net/session.ts` (read or create-and-store on first launch via `POST /session`)
+- [X] T058 [P] Implement `BotecoButton` and `Avatar` primitive components in `packages/client/src/components/`
+- [X] T059 [P] Implement `Tile` component (8px corner radius, ivory surface, navy pips) in `packages/client/src/components/Tile.tsx`
+- [X] T060 [P] Implement `Board` component rendering laid chain with the two open ends visually distinguished, in `packages/client/src/components/Board.tsx`
+- [X] T061 [P] Implement `Hand` component rendering current player's hand with legality highlighting (advisory, server is authoritative) in `packages/client/src/components/Hand.tsx`
+- [X] T062 [P] Implement `TurnIndicator` component (shows current seat + countdown using `turnDeadlineMs`) in `packages/client/src/components/TurnIndicator.tsx`
+- [X] T063 Implement `HomeScreen` rendering three primary actions ("Criar Partida", "Entrar em Partida", "Jogar Offline") plus a "Regras" link, per `design/stitch_mesa_de_domin/home_screen/code.html`, in `packages/client/src/app/HomeScreen.tsx` — depends on T058
+- [X] T064 Implement `GameScreen` taking `gameView: PublicMatchView`, `mySeat: Seat`, `myHand: PrivatePlayerView`, `onIntent(intent)` props (data-source agnostic), in `packages/client/src/app/GameScreen.tsx` — depends on T060, T061, T062
+- [X] T065 Implement `EndScreen` taking `result: MatchResult` + `onRematch` + `onHome` props, per `design/stitch_mesa_de_domin/fim_de_jogo/code.html`, in `packages/client/src/app/EndScreen.tsx` — depends on T058
+- [X] T066 Implement `RulesScreen` (static content per `design/stitch_mesa_de_domin/regras/code.html`) in `packages/client/src/app/RulesScreen.tsx`
+- [X] T067 Implement simple route/state switcher in `packages/client/src/main.tsx` that renders HomeScreen by default and exposes a `navigate(screen, props)` function — depends on T063, T064, T065, T066
+- [X] T068 Initialize Capacitor Android project: `npx cap add android` from `packages/client/`, commit generated `packages/client/android/` skeleton
 
 **Checkpoint**: Foundation complete. `npm test` is green with engine coverage ≥95% and total time <5 s. `npm run dev:server` answers `/health`. `npm run dev:client` shows the home screen rendered from the design tokens.
 

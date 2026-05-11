@@ -4,12 +4,14 @@ export interface ServerConfig {
   readonly mode: ServerMode;
   readonly port: number;
   readonly host: string;
+  readonly debug: boolean;
 }
 
 export function parseConfig(argv: readonly string[]): ServerConfig {
   let mode: ServerMode = 'online';
   let port = 4123;
   let host = '0.0.0.0';
+  let debug = false;
 
   for (const arg of argv) {
     if (arg.startsWith('--mode=')) {
@@ -26,7 +28,13 @@ export function parseConfig(argv: readonly string[]): ServerConfig {
       port = v;
     } else if (arg.startsWith('--host=')) {
       host = arg.slice('--host='.length);
+    } else if (arg === '--debug') {
+      debug = true;
     }
   }
-  return { mode, port, host };
+  return { mode, port, host, debug };
+}
+
+export function isRoomsEndpointEnabled(config: ServerConfig): boolean {
+  return config.mode === 'lan' || config.debug;
 }

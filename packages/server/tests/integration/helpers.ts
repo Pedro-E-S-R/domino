@@ -27,14 +27,21 @@ export interface TestServer {
 export interface StartTestServerOptions {
   turnDurationMs?: number;
   reconnectWindowMs?: number;
+  mode?: 'online' | 'lan';
+  debug?: boolean;
 }
 
 export async function startTestServer(opts: StartTestServerOptions = {}): Promise<TestServer> {
-  const config: ServerConfig = { mode: 'online', port: 0, host: '127.0.0.1' };
+  const config: ServerConfig = {
+    mode: opts.mode ?? 'online',
+    port: 0,
+    host: '127.0.0.1',
+    debug: opts.debug ?? false,
+  };
   const sessions = new SessionStore();
   const registry = new RoomRegistry();
   const logger = createLogger({ level: 'silent' });
-  const app = createHttpApp({ config, sessions, logger });
+  const app = createHttpApp({ config, sessions, registry, logger });
   const httpServer = createServer(app);
   createSocketServer({
     httpServer,

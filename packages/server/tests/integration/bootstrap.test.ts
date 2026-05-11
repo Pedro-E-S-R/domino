@@ -15,11 +15,11 @@ let baseUrl: string;
 let sessions: SessionStore;
 
 beforeAll(async () => {
-  const config: ServerConfig = { mode: 'online', port: 0, host: '127.0.0.1' };
+  const config: ServerConfig = { mode: 'online', port: 0, host: '127.0.0.1', debug: false };
   sessions = new SessionStore();
   const registry = new RoomRegistry();
   const logger = createLogger({ level: 'silent' });
-  const app = createHttpApp({ config, sessions, logger });
+  const app = createHttpApp({ config, sessions, registry, logger });
   httpServer = createServer(app);
   createSocketServer({ httpServer, sessions, registry, logger });
   await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve));

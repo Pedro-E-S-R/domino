@@ -192,4 +192,8 @@ export class RoomRegistry {
   size(): number {
     return this.byCode.size;
   }
+
+  list(): readonly Match[] {
+    return Array.from(this.byCode.values());
+  }
 }

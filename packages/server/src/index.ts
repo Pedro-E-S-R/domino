@@ -16,7 +16,7 @@ async function main(): Promise<void> {
     if (removed > 0) logger.info({ removed }, 'GC: removed orphan matches');
   }, 5 * 60 * 1000).unref();
 
-  const app = createHttpApp({ config, sessions, logger });
+  const app = createHttpApp({ config, sessions, registry, logger });
   const httpServer = createServer(app);
   createSocketServer({ httpServer, sessions, registry, logger });
 

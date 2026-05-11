@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Dominó</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none; 
+        }
+        .domino-piece {
+            width: 80px; 
+            height: 40px; 
+            border: 1px solid #333;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-radius: 4px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            font-size: 10px; 
+            flex-shrink: 0; /* Impede que as peças encolham em containers flex */
+        }
+        .domino-piece:hover:not(.face-down):not(.played-on-board) {
+            transform: translateY(-5px);
+            box-shadow: 3px 8px 8px rgba(0,0,0,0.3);
+        }
+        .domino-piece.vertical {
+            width: 40px;
+            height: 80px;
+            flex-direction: column;
+        }
+        .domino-piece .half {
+            width: 38px; 
+            height: 38px; 
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .domino-piece.vertical .half {
+             width: 38px;
+             height: 38px;
+        }
+        .domino-piece .divider {
+            width: 1px;
+            height: 100%;
+            background-color: #333;
+        }
+        .domino-piece.vertical .divider {
+            width: 100%;
+            height: 1px;
+        }
+        .pip {
+            width: 6px;
+            height: 6px;
+            background-color: black;
+            border-radius: 50%;
+            margin: 1px; 
+        }
+        /* Pip patterns */
+        .pips-0 .pip { display: none; }
+        .pips-1 .pip:nth-child(1) { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .pips-2 .pip:nth-child(1) { position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-2 .pip:nth-child(2) { position: absolute; top: 75%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-3 .pip:nth-child(1) { position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-3 .pip:nth-child(2) { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .pips-3 .pip:nth-child(3) { position: absolute; top: 75%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-4 .pip:nth-child(1) { position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-4 .pip:nth-child(2) { position: absolute; top: 25%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-4 .pip:nth-child(3) { position: absolute; top: 75%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-4 .pip:nth-child(4) { position: absolute; top: 75%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-5 .pip:nth-child(1) { position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-5 .pip:nth-child(2) { position: absolute; top: 25%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-5 .pip:nth-child(3) { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .pips-5 .pip:nth-child(4) { position: absolute; top: 75%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-5 .pip:nth-child(5) { position: absolute; top: 75%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-6 .pip:nth-child(1) { position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-6 .pip:nth-child(2) { position: absolute; top: 25%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-6 .pip:nth-child(3) { position: absolute; top: 50%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-6 .pip:nth-child(4) { position: absolute; top: 50%; left: 75%; transform: translate(-50%, -50%); }
+        .pips-6 .pip:nth-child(5) { position: absolute; top: 75%; left: 25%; transform: translate(-50%, -50%); }
+        .pips-6 .pip:nth-child(6) { position: absolute; top: 75%; left: 75%; transform: translate(-50%, -50%); }
+
+        .face-down {
+            background-color: #555;
+            background-image: repeating-linear-gradient(45deg, #666, #666 10px, #555 10px, #555 20px);
+        }
+        .face-down .half, .face-down .divider {
+            display: none;
+        }
+        .hand {
+            display: flex;
+            gap: 5px;
+            padding: 5px;
+            min-height: 50px; 
+            flex-wrap: wrap; 
+        }
+        
+        .board-area {
+            background-color: #2E8B57; 
+            border: 2px solid #8B4513; 
+            border-radius: 10px;
+            padding: 10px; 
+            margin: 0; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 200px; 
+            overflow-y: auto; 
+            overflow-x: hidden; 
+            width: 100%; 
+        }
+        .domino-chain {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center; 
+            justify-content: flex-start; 
+            gap: 2px; 
+            padding: 5px; 
+            width: 100%; 
+            min-height: 90px; 
+        }
+        .modal {
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .modal-content.small {
+            max-width: 350px;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+        }
+        .player-area {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        .player-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .highlight-turn {
+             box-shadow: 0 0 15px 5px gold !important;
+             border: 2px solid gold !important;
+        }
+        .action-buttons button {
+            margin: 0 5px;
+        }
+
+        /* Layout principal com Grid */
+        .game-layout {
+            display: grid;
+            grid-template-areas:
+                "topbar topbar"
+                "status status"
+                "sidebar board"
+                "player1 player1" 
+                "monte monte";
+            grid-template-rows: auto auto 1fr auto auto; 
+            grid-template-columns: 220px 1fr; 
+            gap: 10px;
+            padding: 10px;
+            height: 100vh; 
+            box-sizing: border-box;
+        }
+
+        .top-bar-area { grid-area: topbar; }
+        .status-message-area { grid-area: status; text-align: center; padding: 10px; background-color: #e0e0e0; border-radius: 6px; }
+        
+        .player-sidebar-area { 
+            grid-area: sidebar; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px;
+            padding: 5px;
+            background-color: #e9e9e9;
+            border-radius: 8px;
+            overflow-y: auto; 
+        }
+        .player-sidebar-area .player-area {
+            padding: 8px;
+        }
+        .player-sidebar-area .hand {
+            justify-content: center; 
+            max-height: 120px; 
+            overflow-y: auto; 
+            gap: 3px;
+        }
+        .player-sidebar-area .hand .domino-piece.face-down {
+            width: 35px; 
+            height: 50px; 
+            background-color: #505050;
+            background-image: repeating-linear-gradient(0deg, #606060, #606060 8px, #505050 8px, #505050 16px);
+        }
+
+
+        .board-container-area { 
+            grid-area: board; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            overflow: hidden; 
+        }
+        .player-1-area { 
+            grid-area: player1; 
+        } 
+        .monte-player-actions-area { 
+            grid-area: monte; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 20px; 
+            padding: 10px;
+        }
+
+
+        @media (max-width: 768px) { 
+            .game-layout {
+                grid-template-areas:
+                    "topbar"
+                    "status"
+                    "sidebar"
+                    "board"
+                    "player1"
+                    "monte";
+                grid-template-rows: auto auto auto auto auto auto; 
+                grid-template-columns: 1fr; 
+                height: auto; 
+                padding: 5px;
+            }
+            .player-sidebar-area {
+                flex-direction: row; 
+                flex-wrap: wrap; 
+                overflow-y: visible;
+                justify-content: space-around;
+            }
+            .player-sidebar-area .player-area {
+                flex-basis: 45%; 
+                min-width: 120px;
+            }
+             .player-sidebar-area .hand .domino-piece.face-down {
+                width: 50px; 
+                height: 30px; 
+                background-image: repeating-linear-gradient(45deg, #666, #666 10px, #555 10px, #555 20px);
+            }
+
+            .domino-piece {
+                width: 60px;
+                height: 30px;
+                font-size: 8px;
+            }
+            .domino-piece.vertical {
+                width: 30px;
+                height: 60px;
+            }
+            .domino-piece .half {
+                width: 28px;
+                height: 28px;
+            }
+            .pip {
+                width: 4px;
+                height: 4px;
+            }
+            .board-area {
+                padding: 5px;
+                min-height: 120px;
+            }
+            .domino-chain {
+                min-height: 70px;
+                padding: 2px;
+            }
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="game-layout">
+        <div class="top-bar-area bg-gray-800 text-white p-4 flex justify-center items-center space-x-4 rounded-md">
+            <button id="newGameBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Novo Jogo</button>
+            <button id="rulesBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Ver Regras</button>
+        </div>
+
+        <div id="statusMessage" class="status-message-area text-lg font-semibold">
+            Bem-vindo ao Dominó! Clique em "Novo Jogo" para começar.
+        </div>
+
+        <div id="playerSidebarArea" class="player-sidebar-area">
+            <div id="playerArea2" class="player-area">
+                <div class="player-name">Jogador 2 (<span id="p2PieceCount">0</span> peças)</div>
+                <div id="player2Hand" class="hand"></div>
+            </div>
+            <div id="playerArea3" class="player-area">
+                <div class="player-name">Jogador 3 (<span id="p3PieceCount">0</span> peças)</div>
+                <div id="player3Hand" class="hand"></div>
+            </div>
+            <div id="playerArea4" class="player-area">
+                <div class="player-name">Jogador 4 (<span id="p4PieceCount">0</span> peças)</div>
+                <div id="player4Hand" class="hand"></div>
+            </div>
+        </div>
+        
+        <div class="board-container-area">
+            <div id="board" class="board-area">
+                <div class="text-white font-bold mb-2 text-xl">Tabuleiro</div>
+                <div id="dominoChain" class="domino-chain">
+                    </div>
+            </div>
+        </div>
+
+        <div id="playerArea1" class="player-area">
+            <div id="player1Hand" class="hand justify-center">
+                </div>
+            <div class="player-name mt-2">Jogador 1 (Você)</div>
+        </div>
+        
+        <div class="monte-player-actions-area">
+            <div class="text-center">
+                <div class="font-semibold">Monte (<span id="monteCount">0</span> peças)</div>
+            </div>
+            <div id="playerActions" class="action-buttons">
+                <button id="drawButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded" style="display:none;">Comprar do Monte</button>
+                <button id="passButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded" style="display:none;">Passar a Vez</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rulesModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span id="closeRulesBtn" class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">Regras do Dominó (Tradicional - Duplo Seis)</h2>
+            <ul class="list-disc pl-5 space-y-2">
+                <li><strong>Conjunto:</strong> Utiliza-se um conjunto padrão de 28 peças (duplo seis).</li>
+                <li><strong>Jogadores:</strong> 4 jogadores.</li>
+                <li><strong>Distribuição:</strong> Cada jogador recebe 7 peças. As peças restantes formam o "monte" para compra.</li>
+                <li><strong>Início:</strong> O jogador com a peça dupla mais alta (6-6, 5-5, etc.) inicia a partida. Se nenhum jogador tiver uma dupla, o jogador com a peça de maior valor (soma dos pontos; em caso de empate, a que tiver o maior lado) começa. A peça inicial é colocada no centro do tabuleiro.</li>
+                <li><strong>Jogadas:</strong> Na sua vez, o jogador deve conectar uma de suas peças a uma das extremidades livres da corrente de dominós no tabuleiro. As peças devem ser conectadas por lados com o mesmo número de pontos. Peças duplas são geralmente jogadas transversalmente (formando um "T"), mas continuam tendo seus dois lados com o mesmo valor para conexão.</li>
+                <li><strong>Comprar Peças:</strong> Se um jogador não puder fazer uma jogada válida, ele deve comprar uma peça do monte. Se a peça comprada puder ser jogada, o jogador pode jogá-la imediatamente. Se não puder jogar a peça comprada ou se o monte estiver vazio, o jogador passa a vez.</li>
+                <li><strong>Passar a Vez:</strong> Se um jogador não tiver peças jogáveis e o monte estiver vazio, ele deve passar a vez.</li>
+                <li><strong>Fim do Jogo:</strong>
+                    <ul class="list-disc pl-5">
+                        <li><strong>Dominó:</strong> O primeiro jogador a ficar sem peças na mão vence a rodada ("bateu").</li>
+                        <li><strong>Trancamento (Fechamento):</strong> Se nenhum jogador puder fazer uma jogada e o monte estiver vazio, o jogo é considerado "trancado". Neste caso, todos os jogadores revelam suas peças restantes. O jogador com o menor número total de pontos em suas peças vence.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="playOptionsModal" class="modal" style="display:none;">
+        <div class="modal-content small"> <h3 id="playOptionsTitle" class="text-lg font-semibold mb-4 text-center">Escolha onde jogar a peça:</h3>
+            <div id="playOptionsButtonsContainer" class="space-y-2">
+                </div>
+            <button id="cancelPlayOptionBtn" class="mt-4 bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded w-full">Cancelar</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Elementos da UI
+        const newGameBtn = document.getElementById('newGameBtn');
+        const rulesBtn = document.getElementById('rulesBtn');
+        const closeRulesBtn = document.getElementById('closeRulesBtn');
+        const rulesModal = document.getElementById('rulesModal');
+        const statusMessageEl = document.getElementById('statusMessage');
+        
+        const player1HandEl = document.getElementById('player1Hand');
+        const playerHandsEls = [ 
+            player1HandEl, 
+            document.getElementById('player2Hand'),
+            document.getElementById('player3Hand'),
+            document.getElementById('player4Hand')
+        ];
+        const playerPieceCountEls = [
+            null, 
+            document.getElementById('p2PieceCount'),
+            document.getElementById('p3PieceCount'),
+            document.getElementById('p4PieceCount')
+        ];
+
+        const boardEl = document.getElementById('dominoChain');
+        const monteCountEl = document.getElementById('monteCount');
+        const drawButton = document.getElementById('drawButton');
+        const passButton = document.getElementById('passButton');
+
+        const playerAreaElements = [ 
+            document.getElementById('playerArea1'),
+            document.getElementById('playerArea2'),
+            document.getElementById('playerArea3'),
+            document.getElementById('playerArea4')
+        ];
+
+        const playOptionsModal = document.getElementById('playOptionsModal');
+        const playOptionsTitleEl = document.getElementById('playOptionsTitle');
+        const playOptionsButtonsContainerEl = document.getElementById('playOptionsButtonsContainer');
+        const cancelPlayOptionBtn = document.getElementById('cancelPlayOptionBtn');
+
+        let gameState = {};
+        let pieceToPlayGlobally = null; 
+
+        const PIECES_PER_PLAYER = 7;
+        const NUM_PLAYERS = 4;
+
+        function createPipDivs(count) {
+            let pipsHtml = '';
+            for (let i = 0; i < count; i++) {
+                pipsHtml += '<div class="pip"></div>';
+            }
+            return pipsHtml;
+        }
+
+        function createPieceElement(piece, isFaceUp = true, isPlayedOnBoard = false, isBotPieceInSidebar = false) {
+            const pieceDiv = document.createElement('div');
+            pieceDiv.classList.add('domino-piece', 'm-1');
+            if (piece && piece.id) pieceDiv.dataset.id = piece.id;
+
+            if (!isFaceUp) {
+                pieceDiv.classList.add('face-down');
+                // Estilos para peças de bot na sidebar são tratados por CSS específico
+            } else {
+                // Estes val1 e val2 são os que devem ser exibidos (já podem estar "rotacionados" logicamente)
+                const half1 = document.createElement('div');
+                half1.classList.add('half', `pips-${piece.val1}`);
+                half1.innerHTML = createPipDivs(piece.val1);
+
+                const divider = document.createElement('div');
+                divider.classList.add('divider');
+
+                const half2 = document.createElement('div');
+                half2.classList.add('half', `pips-${piece.val2}`);
+                half2.innerHTML = createPipDivs(piece.val2);
+                
+                // Limpa a classe 'vertical' antes de decidir a orientação
+                pieceDiv.classList.remove('vertical');
+
+                if (isPlayedOnBoard) {
+                    pieceDiv.classList.add('played-on-board');
+                    if (piece.isDouble) { // Peças DUPLAS no tabuleiro são VERTICAIS
+                        pieceDiv.classList.add('vertical');
+                    }
+                    // Peças NÃO DUPLAS no tabuleiro são HORIZONTAIS (ausência da classe 'vertical')
+                } else {
+                    // Peças na MÃO DO JOGADOR são sempre HORIZONTAIS (ausência da classe 'vertical')
+                }
+
+                // Adiciona as metades e o divisor baseado na orientação final
+                if (pieceDiv.classList.contains('vertical')) { // Peça vertical (dupla no tabuleiro)
+                    pieceDiv.appendChild(half1); // piece.val1 (displayedVal1) no topo
+                    pieceDiv.appendChild(divider);
+                    pieceDiv.appendChild(half2); // piece.val2 (displayedVal2) na base
+                } else { // Peça horizontal (não dupla no tabuleiro, ou qualquer peça na mão)
+                    pieceDiv.appendChild(half1); // piece.val1 (displayedVal1) à esquerda
+                    pieceDiv.appendChild(divider);
+                    pieceDiv.appendChild(half2); // piece.val2 (displayedVal2) à direita
+                }
+            }
+            return pieceDiv;
+        }
+        
+        function renderHands() {
+            player1HandEl.innerHTML = '';
+            if (gameState.players && gameState.players[0]) {
+                gameState.players[0].hand.forEach(p => {
+                    // Para a mão do jogador, p.val1 e p.val2 são os valores originais da peça.
+                    // createPieceElement os usará para half1 e half2. Como isPlayedOnBoard será false,
+                    // a peça será horizontal.
+                    const pieceEl = createPieceElement(p, true, false); 
+                    pieceEl.addEventListener('click', () => handlePieceClick(p.id));
+                    player1HandEl.appendChild(pieceEl);
+                });
+            }
+
+            for (let i = 1; i < NUM_PLAYERS; i++) {
+                const handEl = playerHandsEls[i];
+                const pieceCountEl = playerPieceCountEls[i];
+                if (handEl && gameState.players && gameState.players[i]) {
+                    handEl.innerHTML = '';
+                    const botPlayer = gameState.players[i];
+                    for (let j = 0; j < botPlayer.hand.length; j++) {
+                        const fakePiece = { id: `bot-${i}-piece-${j}`}; 
+                        const pieceEl = createPieceElement(fakePiece, false, false, true); 
+                        handEl.appendChild(pieceEl);
+                    }
+                    if (pieceCountEl) pieceCountEl.textContent = botPlayer.hand.length;
+                }
+            }
+        }
+
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            if (!gameState.board) return;
+
+            gameState.board.forEach(boardPieceData => {
+                // boardPieceData contém:
+                // piece: o objeto original da peça {id, val1, val2, isDouble}
+                // displayedVal1: valor a ser mostrado na primeira metade visual da peça
+                // displayedVal2: valor a ser mostrado na segunda metade visual da peça
+                
+                const pieceForDisplay = {
+                    id: boardPieceData.piece.id,
+                    val1: boardPieceData.displayedVal1, 
+                    val2: boardPieceData.displayedVal2, 
+                    isDouble: boardPieceData.piece.isDouble // Essencial para createPieceElement definir orientação
+                };
+                
+                // true para isFaceUp, true para isPlayedOnBoard
+                const pieceEl = createPieceElement(pieceForDisplay, true, true); 
+                
+                boardEl.appendChild(pieceEl);
+            });
+        }
+
+        function updateStatusMessage(message) {
+            statusMessageEl.textContent = message;
+        }
+
+        function updateMonteCount() {
+            monteCountEl.textContent = gameState.monte ? gameState.monte.length : 0;
+        }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createDominoSet() {
+            const pieces = [];
+            for (let i = 0; i <= 6; i++) {
+                for (let j = i; j <= 6; j++) {
+                    pieces.push({ id: `${i}-${j}`, val1: i, val2: j, isDouble: i === j });
+                }
+            }
+            return pieces;
+        }
+        
+        function findStartingPlayer() {
+            let startingPlayerIndex = -1;
+            let highestDoubleValue = -1;
+            let highestPieceSum = -1;
+            let highestPieceVal = -1;
+
+            gameState.players.forEach((player, index) => {
+                player.hand.forEach(piece => {
+                    if (piece.isDouble) {
+                        if (piece.val1 > highestDoubleValue) {
+                            highestDoubleValue = piece.val1;
+                            startingPlayerIndex = index;
+                        }
+                    }
+                });
+            });
+
+            if (startingPlayerIndex !== -1) {
+                const startingPiece = gameState.players[startingPlayerIndex].hand.find(p => p.isDouble && p.val1 === highestDoubleValue);
+                return { playerIndex: startingPlayerIndex, piece: startingPiece };
+            }
+
+            gameState.players.forEach((player, index) => {
+                player.hand.forEach(piece => {
+                    const sum = piece.val1 + piece.val2;
+                    const maxVal = Math.max(piece.val1, piece.val2);
+                    if (sum > highestPieceSum) {
+                        highestPieceSum = sum;
+                        highestPieceVal = maxVal;
+                        startingPlayerIndex = index;
+                    } else if (sum === highestPieceSum) {
+                        if (maxVal > highestPieceVal) {
+                            highestPieceVal = maxVal;
+                            startingPlayerIndex = index;
+                        }
+                    }
+                });
+            });
+            
+            if (startingPlayerIndex !== -1) {
+                 const startingPiece = gameState.players[startingPlayerIndex].hand.find(p => {
+                    const sum = p.val1 + p.val2;
+                    const maxVal = Math.max(p.val1, p.val2);
+                    return sum === highestPieceSum && maxVal === highestPieceVal;
+                });
+                return { playerIndex: startingPlayerIndex, piece: startingPiece };
+            }
+            // Fallback raro, caso nenhuma peça seja encontrada (não deve acontecer em jogo normal)
+            if (gameState.players[0] && gameState.players[0].hand.length > 0) {
+                 return { playerIndex: 0, piece: gameState.players[0].hand[0] }; 
+            }
+            // Se nem o fallback funcionar (jogo não inicializado corretamente), retorna um placeholder
+            console.error("Erro crítico: Não foi possível determinar jogador inicial ou não há peças.");
+            return { playerIndex: 0, piece: {id: "error-0-0", val1:0, val2:0, isDouble:true}};
+
+
+        }
+
+        function initGame() {
+            const allPieces = createDominoSet();
+            shuffleArray(allPieces);
+
+            gameState = {
+                players: Array(NUM_PLAYERS).fill(null).map((_, i) => ({
+                    id: i,
+                    name: `Jogador ${i + 1}${i === 0 ? ' (Você)' : ''}`,
+                    hand: [],
+                    isBot: i !== 0, 
+                    score: 0 
+                })),
+                board: [], 
+                playableEnds: { left: null, right: null }, // Valores das pontas do tabuleiro
+                monte: [],
+                currentPlayerIndex: 0,
+                isGameOver: false,
+                passesInARow: 0,
+            };
+
+            for (let i = 0; i < PIECES_PER_PLAYER; i++) {
+                for (let j = 0; j < NUM_PLAYERS; j++) {
+                    if (allPieces.length > 0) {
+                        gameState.players[j].hand.push(allPieces.pop());
+                    }
+                }
+            }
+            gameState.monte = allPieces;
+
+            const startData = findStartingPlayer();
+            gameState.currentPlayerIndex = startData.playerIndex;
+            
+            const firstPiece = startData.piece;
+            removePieceFromHand(startData.playerIndex, firstPiece.id);
+            
+            // A primeira peça define as pontas iniciais do tabuleiro
+            // Seus displayedVal1 e displayedVal2 são seus val1 e val2 originais
+            gameState.board.push({ piece: firstPiece, displayedVal1: firstPiece.val1, displayedVal2: firstPiece.val2 });
+            gameState.playableEnds = { left: firstPiece.val1, right: firstPiece.val2 };
+            
+            const nextPlayerAfterStart = getNextPlayerIndex(startData.playerIndex);
+            updateStatusMessage(`Peças distribuídas. ${gameState.players[startData.playerIndex].name} começa com ${firstPiece.id}. Vez de ${gameState.players[nextPlayerAfterStart].name}.`);
+            gameState.currentPlayerIndex = nextPlayerAfterStart; 
+
+            renderAll();
+            highlightCurrentPlayer();
+            checkPlayerActions(); 
+            if (gameState.players[gameState.currentPlayerIndex].isBot) {
+                setTimeout(botTurn, 1000);
+            }
+        }
+        
+        function getNextPlayerIndex(currentIndex) {
+            return (currentIndex + 1) % NUM_PLAYERS;
+        }
+
+        function removePieceFromHand(playerIndex, pieceId) {
+            gameState.players[playerIndex].hand = gameState.players[playerIndex].hand.filter(p => p.id !== pieceId);
+        }
+
+        function addPieceToBoard(piece, playedEnd) {
+            // piece: o objeto da peça original da mão do jogador {id, val1, val2, isDouble}
+            // playedEnd: 'left' ou 'right', indica em qual ponta do tabuleiro a peça foi jogada
+            // gameState.playableEnds.left/right: os valores atualmente expostos nas pontas do tabuleiro
+
+            let dVal1, dVal2; // Valores que serão exibidos na peça no tabuleiro (displayedVal1, displayedVal2)
+
+            if (playedEnd === 'left') {
+                // A peça será adicionada no início (unshift) da lista gameState.board
+                // A nova ponta esquerda do tabuleiro será a ponta da 'piece' que NÃO se conectou.
+                if (gameState.playableEnds.left === piece.val1) {
+                    // piece.val1 conecta com a ponta esquerda. piece.val2 é a nova ponta.
+                    dVal1 = piece.val2; // Este valor ficará "para fora" (nova playableEnds.left)
+                    dVal2 = piece.val1; // Este valor ficará "para dentro", conectado
+                    gameState.playableEnds.left = piece.val2;
+                } else { // gameState.playableEnds.left === piece.val2
+                    // piece.val2 conecta com a ponta esquerda. piece.val1 é a nova ponta.
+                    dVal1 = piece.val1; // Este valor ficará "para fora"
+                    dVal2 = piece.val2; // Este valor ficará "para dentro"
+                    gameState.playableEnds.left = piece.val1;
+                }
+                // Para renderização, dVal1 é a "primeira" metade visual, dVal2 é a "segunda".
+                // Se a peça for horizontal, dVal1 é esquerda, dVal2 direita.
+                // Se for vertical, dVal1 é topo, dVal2 base.
+                gameState.board.unshift({ piece: piece, displayedVal1: dVal1, displayedVal2: dVal2 });
+            } else { // playedEnd === 'right'
+                // A peça será adicionada no final (push) da lista gameState.board
+                // A nova ponta direita do tabuleiro será a ponta da 'piece' que NÃO se conectou.
+                if (gameState.playableEnds.right === piece.val1) {
+                    // piece.val1 conecta com a ponta direita. piece.val2 é a nova ponta.
+                    dVal1 = piece.val1; // Este valor ficará "para dentro", conectado
+                    dVal2 = piece.val2; // Este valor ficará "para fora" (nova playableEnds.right)
+                    gameState.playableEnds.right = piece.val2;
+                } else { // gameState.playableEnds.right === piece.val2
+                    // piece.val2 conecta com a ponta direita. piece.val1 é a nova ponta.
+                    dVal1 = piece.val2; // Este valor ficará "para dentro"
+                    dVal2 = piece.val1; // Este valor ficará "para fora"
+                    gameState.playableEnds.right = piece.val1;
+                }
+                gameState.board.push({ piece: piece, displayedVal1: dVal1, displayedVal2: dVal2 });
+            }
+        }
+
+
+        function getPlayableMoves(playerIndex) {
+            const player = gameState.players[playerIndex];
+            const moves = [];
+            if (!gameState.board || gameState.board.length === 0) { 
+                // No início do jogo, a primeira peça define as pontas. Esta função é chamada depois.
+                // Se por algum motivo o tabuleiro estiver vazio e for a vez de alguém,
+                // teoricamente qualquer peça poderia ser jogada, mas o fluxo do jogo não deve permitir isso aqui.
+                // Esta condição é mais um fallback. A primeira peça é jogada em initGame.
+                return player.hand.map(p => ({ pieceId: p.id, pieceVal1: p.val1, pieceVal2: p.val2, playOn: 'boardStart', pieceRef: p }));
+            }
+
+            player.hand.forEach(p => {
+                // Checa se a peça p pode ser jogada na ponta ESQUERDA do tabuleiro
+                if (p.val1 === gameState.playableEnds.left || p.val2 === gameState.playableEnds.left) {
+                    moves.push({ pieceId: p.id, pieceVal1: p.val1, pieceVal2: p.val2, playOn: 'left', pieceRef: p });
+                }
+                
+                // Checa se a peça p pode ser jogada na ponta DIREITA do tabuleiro
+                // Evita adicionar a mesma jogada duas vezes se a peça pode conectar em ambas as pontas
+                // e as pontas do tabuleiro são iguais (ex: tabuleiro só com 6-6, pontas são 6 e 6).
+                // Nesse caso, jogar 6-X na esquerda ou direita é a mesma jogada lógica.
+                // A distinção só importa se as pontas do tabuleiro forem diferentes.
+                const canPlayRight = (p.val1 === gameState.playableEnds.right || p.val2 === gameState.playableEnds.right);
+                
+                if (canPlayRight) {
+                    // Adiciona a jogada na direita se:
+                    // 1. As pontas do tabuleiro são diferentes (playableEnds.left !== playableEnds.right)
+                    // OU
+                    // 2. A peça não pôde ser jogada na esquerda (ou seja, esta é a única ponta onde ela encaixa)
+                    //    (moves.find(m => m.pieceId === p.id && m.playOn === 'left') === undefined)
+                    // Simplificação: se as pontas são diferentes, ou se a peça não foi adicionada para a esquerda
+                    let alreadyAddedForLeft = moves.some(m => m.pieceId === p.id && m.playOn === 'left');
+                    if (gameState.playableEnds.left !== gameState.playableEnds.right || !alreadyAddedForLeft) {
+                         moves.push({ pieceId: p.id, pieceVal1: p.val1, pieceVal2: p.val2, playOn: 'right', pieceRef: p });
+                    }
+                }
+            });
+            
+            // Remove duplicatas exatas (mesma peça, mesma ponta de destino) que podem surgir
+            // se a lógica acima não for perfeita para todos os casos de peças duplas e pontas iguais.
+            const uniqueMoves = [];
+            const seen = new Set(); // Para rastrear combinações de pieceId e playOn
+            for (const move of moves) {
+                const key = `${move.pieceId}-${move.playOn}`;
+                if (!seen.has(key)) {
+                    uniqueMoves.push(move);
+                    seen.add(key);
+                }
+            }
+            return uniqueMoves;
+        }
+        
+        function executePlayerMove(piece, chosenMove) {
+            playOptionsModal.style.display = 'none'; 
+            if (!piece || !chosenMove) return;
+
+            removePieceFromHand(0, piece.id);
+            addPieceToBoard(piece, chosenMove.playOn); // 'piece' é o obj original da mão
+            
+            gameState.passesInARow = 0;
+            updateStatusMessage(`${gameState.players[0].name} jogou ${piece.id}. Vez de ${gameState.players[getNextPlayerIndex(0)].name}.`);
+            checkGameEnd(0);
+            if (!gameState.isGameOver) {
+                nextTurn();
+            }
+            renderAll();
+            pieceToPlayGlobally = null; 
+        }
+
+        function handlePieceClick(pieceId) {
+            if (gameState.isGameOver || gameState.currentPlayerIndex !== 0) return; 
+
+            const piece = gameState.players[0].hand.find(p => p.id === pieceId);
+            if (!piece) return;
+
+            const possibleMovesForPiece = getPlayableMoves(0).filter(m => m.pieceId === pieceId);
+
+            if (possibleMovesForPiece.length === 0) {
+                updateStatusMessage("Peça não jogável. Tente outra ou compre do monte.");
+                return;
+            }
+            
+            if (possibleMovesForPiece.length === 1) {
+                executePlayerMove(piece, possibleMovesForPiece[0]);
+            } else {
+                pieceToPlayGlobally = piece; 
+                playOptionsTitleEl.textContent = `Jogar ${piece.id} (${piece.val1}-${piece.val2}):`;
+                playOptionsButtonsContainerEl.innerHTML = ''; 
+
+                possibleMovesForPiece.forEach(move => {
+                    const btn = document.createElement('button');
+                    const endValue = move.playOn === 'left' ? gameState.playableEnds.left : gameState.playableEnds.right;
+                    btn.textContent = `Na ponta ${move.playOn === 'left' ? 'Esquerda' : 'Direita'} (valor ${endValue})`;
+                    btn.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded', 'w-full');
+                    btn.onclick = () => executePlayerMove(pieceToPlayGlobally, move);
+                    playOptionsButtonsContainerEl.appendChild(btn);
+                });
+                playOptionsModal.style.display = 'flex';
+            }
+        }
+
+        cancelPlayOptionBtn.addEventListener('click', () => {
+            playOptionsModal.style.display = 'none';
+            pieceToPlayGlobally = null;
+        });
+
+
+        function checkPlayerActions() { 
+            if (gameState.isGameOver || gameState.currentPlayerIndex !== 0) {
+                drawButton.style.display = 'none';
+                passButton.style.display = 'none';
+                return;
+            }
+
+            const possibleMoves = getPlayableMoves(0);
+            const humanPlayerCanPlay = possibleMoves.length > 0;
+            const humanPlayerMustDraw = !humanPlayerCanPlay && gameState.monte.length > 0;
+            const humanPlayerCanPass = !humanPlayerCanPlay && gameState.monte.length === 0;
+
+            drawButton.style.display = humanPlayerMustDraw ? 'inline-block' : 'none';
+            passButton.style.display = humanPlayerCanPass ? 'inline-block' : 'none';
+
+            if (humanPlayerCanPlay) {
+                 updateStatusMessage("Sua vez. Escolha uma peça para jogar.");
+            } else if (humanPlayerMustDraw) {
+                 updateStatusMessage("Sua vez. Você não tem peças para jogar. Compre do monte.");
+            } else if (humanPlayerCanPass) {
+                 updateStatusMessage("Sua vez. Você não tem peças para jogar e o monte está vazio. Passe a vez.");
+            }
+        }
+
+        drawButton.addEventListener('click', () => {
+            if (gameState.isGameOver || gameState.currentPlayerIndex !== 0 ) return;
+            const possibleMoves = getPlayableMoves(0);
+            if (possibleMoves.length > 0) {
+                updateStatusMessage("Você tem jogadas possíveis. Não precisa comprar.");
+                return;
+            }
+            if (gameState.monte.length === 0) {
+                 updateStatusMessage("Monte vazio. Você deve passar a vez.");
+                return;
+            }
+
+            if (gameState.monte.length > 0) {
+                const drawnPiece = gameState.monte.pop();
+                gameState.players[0].hand.push(drawnPiece);
+                updateStatusMessage(`Você comprou ${drawnPiece.id}.`);
+                gameState.passesInARow = 0; 
+                renderHands();
+                updateMonteCount();
+                checkPlayerActions(); 
+            }
+        });
+
+        passButton.addEventListener('click', () => {
+            if (gameState.isGameOver || gameState.currentPlayerIndex !== 0) return;
+            
+            const possibleMoves = getPlayableMoves(0);
+            if (possibleMoves.length > 0) {
+                updateStatusMessage("Você tem jogadas possíveis. Não pode passar.");
+                return;
+            }
+            if (gameState.monte.length > 0) {
+                updateStatusMessage("O monte ainda tem peças. Você deve comprar.");
+                return;
+            }
+            
+            gameState.passesInARow++;
+            updateStatusMessage(`${gameState.players[0].name} passou a vez. Vez de ${gameState.players[getNextPlayerIndex(0)].name}.`);
+            checkGameEnd(0); 
+            if (!gameState.isGameOver) {
+                nextTurn();
+            }
+            renderAll();
+        });
+
+
+        function botTurn() {
+            if (gameState.isGameOver) return;
+            const playerIndex = gameState.currentPlayerIndex;
+            const player = gameState.players[playerIndex];
+
+            const possibleMoves = getPlayableMoves(playerIndex);
+
+            if (possibleMoves.length > 0) {
+                const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]; 
+                const pieceToPlay = player.hand.find(p => p.id === move.pieceId);
+                
+                removePieceFromHand(playerIndex, pieceToPlay.id);
+                addPieceToBoard(pieceToPlay, move.playOn);
+                
+                gameState.passesInARow = 0;
+                updateStatusMessage(`${player.name} jogou ${pieceToPlay.id}. Vez de ${gameState.players[getNextPlayerIndex(playerIndex)].name}.`);
+                checkGameEnd(playerIndex);
+            } else {
+                if (gameState.monte.length > 0) {
+                    const drawnPiece = gameState.monte.pop();
+                    player.hand.push(drawnPiece);
+                    gameState.passesInARow = 0; 
+                    updateStatusMessage(`${player.name} comprou do monte.`);
+                    
+                    const newPossibleMoves = getPlayableMoves(playerIndex);
+                    if (newPossibleMoves.length > 0) {
+                         setTimeout(() => { 
+                            const newMove = newPossibleMoves[Math.floor(Math.random() * newPossibleMoves.length)];
+                            const newPieceToPlay = player.hand.find(p => p.id === newMove.pieceId);
+                            
+                            removePieceFromHand(playerIndex, newPieceToPlay.id);
+                            addPieceToBoard(newPieceToPlay, newMove.playOn);
+                            updateStatusMessage(`${player.name} jogou ${newPieceToPlay.id} após comprar. Vez de ${gameState.players[getNextPlayerIndex(playerIndex)].name}.`);
+                            checkGameEnd(playerIndex);
+                             if (!gameState.isGameOver) nextTurn();
+                             renderAll(); // Renderiza aqui dentro do timeout
+                        }, 700);
+                        return; 
+                    } else {
+                         updateStatusMessage(`${player.name} comprou e não pôde jogar. Vez de ${gameState.players[getNextPlayerIndex(playerIndex)].name}.`);
+                    }
+                } else {
+                    gameState.passesInARow++;
+                    updateStatusMessage(`${player.name} passou a vez. Vez de ${gameState.players[getNextPlayerIndex(playerIndex)].name}.`);
+                    checkGameEnd(playerIndex); 
+                }
+            }
+            
+            // Este bloco só é alcançado se o bot não comprou e jogou (que tem seu próprio nextTurn e renderAll)
+            if (!gameState.isGameOver) {
+                nextTurn();
+            }
+            renderAll(); // Renderiza para os casos de jogada direta ou passar a vez
+        }
+        
+        function checkGameEnd(playerIndexOfLastMove) {
+            const player = gameState.players[playerIndexOfLastMove];
+            if (player.hand.length === 0) {
+                gameState.isGameOver = true;
+                updateStatusMessage(`Fim de Jogo! ${player.name} bateu e venceu!`);
+                disablePlayerActions();
+                return;
+            }
+
+            if (gameState.passesInARow >= NUM_PLAYERS) {
+                gameState.isGameOver = true;
+                let minScore = Infinity;
+                let winners = []; 
+                
+                gameState.players.forEach((p, index) => {
+                    const currentScore = p.hand.reduce((sum, piece) => sum + piece.val1 + piece.val2, 0);
+                    p.currentScore = currentScore; 
+                    if (currentScore < minScore) {
+                        minScore = currentScore;
+                        winners = [p.name];
+                    } else if (currentScore === minScore) {
+                        winners.push(p.name);
+                    }
+                });
+                
+                let scoreSummary = gameState.players.map(p => `${p.name}: ${p.currentScore} pts`).join('; ');
+                if (winners.length === 1) {
+                    updateStatusMessage(`Jogo Trancado! ${winners[0]} venceu com menos pontos (${minScore}). Pontuações: ${scoreSummary}`);
+                } else {
+                     updateStatusMessage(`Jogo Trancado! Empate entre ${winners.join(' e ')} com ${minScore} pontos. Pontuações: ${scoreSummary}`);
+                }
+                disablePlayerActions();
+                return;
+            }
+        }
+
+        function disablePlayerActions() {
+            drawButton.style.display = 'none';
+            passButton.style.display = 'none';
+        }
+
+        function nextTurn() {
+            if (gameState.isGameOver) return;
+            gameState.currentPlayerIndex = getNextPlayerIndex(gameState.currentPlayerIndex);
+            highlightCurrentPlayer();
+            checkPlayerActions(); 
+
+            if (gameState.players[gameState.currentPlayerIndex].isBot) {
+                setTimeout(botTurn, 1500 + Math.random() * 500); 
+            }
+        }
+
+        function highlightCurrentPlayer() {
+            playerAreaElements.forEach((el, idx) => {
+                if (idx === gameState.currentPlayerIndex) {
+                    el.classList.add('highlight-turn');
+                } else {
+                    el.classList.remove('highlight-turn');
+                }
+            });
+        }
+        
+        function renderAll() {
+            renderHands();
+            renderBoard();
+            updateMonteCount();
+            if (gameState.isGameOver) {
+                disablePlayerActions();
+            }
+        }
+
+        newGameBtn.addEventListener('click', initGame);
+        rulesBtn.addEventListener('click', () => rulesModal.style.display = 'flex');
+        closeRulesBtn.addEventListener('click', () => rulesModal.style.display = 'none');
+        window.addEventListener('click', (event) => {
+            if (event.target === rulesModal) {
+                rulesModal.style.display = 'none';
+            }
+            if (event.target === playOptionsModal) { 
+                playOptionsModal.style.display = 'none';
+                pieceToPlayGlobally = null;
+            }
+        });
+        
+        updateStatusMessage("Bem-vindo ao Dominó! Clique em 'Novo Jogo' para começar.");
+        disablePlayerActions(); 
+    </script>
+</body>
+</html>

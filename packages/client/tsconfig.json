@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "noEmit": true
+  },
+  "references": [
+    { "path": "../engine" },
+    { "path": "../contracts" }
+  ],
+  "include": ["src/**/*"],
+  "exclude": ["dist", "android", "node_modules"]
+}

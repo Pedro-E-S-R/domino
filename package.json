@@ -1,0 +1,34 @@
+{
+  "name": "domino-online",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Dominó Online — Brazilian double-six multiplayer (Android via Capacitor, Node.js authoritative server)",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/engine",
+    "packages/contracts",
+    "packages/server",
+    "packages/client"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev:server": "npm run dev -w @domino/server",
+    "dev:client": "npm run dev -w @domino/client",
+    "dev:lan": "npm run dev:lan -w @domino/server",
+    "build:client": "npm run build -w @domino/client",
+    "build:android": "npm run build:android -w @domino/client",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Test output
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+*.iml
+
+# Vite
+.vite/
+
+# Capacitor / Android build artifacts
+packages/client/android/.gradle/
+packages/client/android/local.properties
+packages/client/android/app/build/
+packages/client/android/build/
+packages/client/android/.idea/
+packages/client/android/captures/
+packages/client/android/*.iml
+packages/client/dist/
+
+# Capacitor sync state
+packages/client/android/app/src/main/assets/public/

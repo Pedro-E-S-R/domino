@@ -144,28 +144,28 @@ Multi-package monorepo layout (see `plan.md` → Project Structure):
 
 ### Server (online flow)
 
-- [ ] T069 [P] [US1] Implement room-code generator with 30-symbol alphabet and rejection sampling against `crypto.randomBytes` in `packages/server/src/rooms/code-generator.ts`
-- [ ] T070 [P] [US1] Implement match registry (`Map<RoomCode, Match>`) with create/get/delete and orphan-GC after 30 min inactivity in `packages/server/src/rooms/registry.ts`
-- [ ] T071 [P] [US1] Implement per-recipient view projection (filters out other seats' hands + boneyard order; computes `legalMoves` for the recipient using `legalMovesFor`) in `packages/server/src/transport/views.ts`
-- [ ] T072 [P] [US1] Implement filtered broadcast helper (`broadcastMatchState(match)` emits per-recipient `match:state`) in `packages/server/src/transport/broadcast.ts`
-- [ ] T073 [US1] Implement `room:create` handler (validates payload via contracts, creates Match in registry, assigns host seat 0, emits `room:state` to creator) in `packages/server/src/transport/handlers.ts` — depends on T070, T071
-- [ ] T074 [US1] Implement `room:join` handler (validates code, rejects `ROOM_FULL`/`ROOM_IN_PROGRESS`, assigns next free seat, broadcasts `room:state`) in `packages/server/src/transport/handlers.ts` — depends on T073
-- [ ] T075 [US1] Implement `room:ready` and `room:leave` handlers in `packages/server/src/transport/handlers.ts` — depends on T074
-- [ ] T076 [US1] Implement `room:start` handler (host-only, requires all seats ready, calls `createInitialState`, emits `match:started` + initial filtered `match:state` to each seat) in `packages/server/src/transport/handlers.ts` — depends on T075
-- [ ] T077 [US1] Implement `move:lay`, `move:draw`, `move:pass` handlers (validate via contracts, dedup via `moveId`, run reducer, broadcast filtered state; emit `match:ended` when `phase === 'ended'`) in `packages/server/src/transport/handlers.ts` — depends on T076
-- [ ] T078 [US1] Write Socket.IO integration test that plays a deterministic 2-player match to completion (fixed seed; scripted moves; asserts identical final view on both sockets) in `packages/server/tests/integration/two-player-match.test.ts`
-- [ ] T079 [US1] Write integration test for illegal-move rejection (client claims a tile it doesn't hold; server emits `error` with `ILLEGAL_MOVE` and `detail.rule`; authoritative state unchanged) in `packages/server/tests/integration/illegal-move.test.ts`
+- [X] T069 [P] [US1] Implement room-code generator with 30-symbol alphabet and rejection sampling against `crypto.randomBytes` in `packages/server/src/rooms/code-generator.ts`
+- [X] T070 [P] [US1] Implement match registry (`Map<RoomCode, Match>`) with create/get/delete and orphan-GC after 30 min inactivity in `packages/server/src/rooms/registry.ts`
+- [X] T071 [P] [US1] Implement per-recipient view projection (filters out other seats' hands + boneyard order; computes `legalMoves` for the recipient using `legalMovesFor`) in `packages/server/src/transport/views.ts`
+- [X] T072 [P] [US1] Implement filtered broadcast helper (`broadcastMatchState(match)` emits per-recipient `match:state`) in `packages/server/src/transport/broadcast.ts`
+- [X] T073 [US1] Implement `room:create` handler (validates payload via contracts, creates Match in registry, assigns host seat 0, emits `room:state` to creator) in `packages/server/src/transport/handlers.ts` — depends on T070, T071
+- [X] T074 [US1] Implement `room:join` handler (validates code, rejects `ROOM_FULL`/`ROOM_IN_PROGRESS`, assigns next free seat, broadcasts `room:state`) in `packages/server/src/transport/handlers.ts` — depends on T073
+- [X] T075 [US1] Implement `room:ready` and `room:leave` handlers in `packages/server/src/transport/handlers.ts` — depends on T074
+- [X] T076 [US1] Implement `room:start` handler (host-only, requires all seats ready, calls `createInitialState`, emits `match:started` + initial filtered `match:state` to each seat) in `packages/server/src/transport/handlers.ts` — depends on T075
+- [X] T077 [US1] Implement `move:lay`, `move:draw`, `move:pass` handlers (validate via contracts, dedup via `moveId`, run reducer, broadcast filtered state; emit `match:ended` when `phase === 'ended'`) in `packages/server/src/transport/handlers.ts` — depends on T076
+- [X] T078 [US1] Write Socket.IO integration test that plays a deterministic 2-player match to completion (fixed seed; scripted moves; asserts identical final view on both sockets) in `packages/server/tests/integration/two-player-match.test.ts`
+- [X] T079 [US1] Write integration test for illegal-move rejection (client claims a tile it doesn't hold; server emits `error` with `ILLEGAL_MOVE` and `detail.rule`; authoritative state unchanged) in `packages/server/tests/integration/illegal-move.test.ts`
 
 ### Client (online flow)
 
-- [ ] T080 [P] [US1] Implement Socket.IO client wrapper with auth payload (`PROTOCOL_VERSION` + `sessionToken`) and typed event emitters in `packages/client/src/net/socket.ts`
-- [ ] T081 [P] [US1] Implement view-store (small typed store fed by `room:state` / `match:state` / `match:ended` / `error` events) in `packages/client/src/net/view-store.ts`
-- [ ] T082 [US1] Implement `CreateMatchScreen` (mode picker — online; player-count picker — 2; calls `socket.emit('room:create', ...)`; navigates to Lobby on `room:state`) per `design/stitch_mesa_de_domin/criar_partida/code.html` in `packages/client/src/app/CreateMatchScreen.tsx` — depends on T080
-- [ ] T083 [US1] Implement `JoinMatchScreen` (code entry with format mask excluding O/I/0/1; emit `room:join`) per `design/stitch_mesa_de_domin/entrar_em_partida/code.html` in `packages/client/src/app/JoinMatchScreen.tsx` — depends on T080
-- [ ] T084 [US1] Implement `LobbyScreen` (renders roster with ready toggles; host sees "Iniciar" button enabled when all ready) in `packages/client/src/app/LobbyScreen.tsx` — depends on T080, T081
-- [ ] T085 [US1] Wire `HomeScreen` "Criar Partida" and "Entrar em Partida" buttons to navigate to their respective screens in `packages/client/src/app/HomeScreen.tsx` — depends on T063, T082, T083
-- [ ] T086 [US1] Wire online-mode glue (subscribe `GameScreen` to `view-store`; map `GameScreen.onIntent` to `socket.emit('move:lay'|'move:draw'|'move:pass', { moveId: uuid(), ... })`) in `packages/client/src/net/online-runner.ts` — depends on T064, T080, T081
-- [ ] T087 [US1] Wire end-of-match navigation (on `match:ended`, transition to `EndScreen`; on `EndScreen.onHome`, return to `HomeScreen` and clear view-store) — depends on T085, T086
+- [X] T080 [P] [US1] Implement Socket.IO client wrapper with auth payload (`PROTOCOL_VERSION` + `sessionToken`) and typed event emitters in `packages/client/src/net/socket.ts`
+- [X] T081 [P] [US1] Implement view-store (small typed store fed by `room:state` / `match:state` / `match:ended` / `error` events) in `packages/client/src/net/view-store.ts`
+- [X] T082 [US1] Implement `CreateMatchScreen` (mode picker — online; player-count picker — 2; calls `socket.emit('room:create', ...)`; navigates to Lobby on `room:state`) per `design/stitch_mesa_de_domin/criar_partida/code.html` in `packages/client/src/app/CreateMatchScreen.tsx` — depends on T080
+- [X] T083 [US1] Implement `JoinMatchScreen` (code entry with format mask excluding O/I/0/1; emit `room:join`) per `design/stitch_mesa_de_domin/entrar_em_partida/code.html` in `packages/client/src/app/JoinMatchScreen.tsx` — depends on T080
+- [X] T084 [US1] Implement `LobbyScreen` (renders roster with ready toggles; host sees "Iniciar" button enabled when all ready) in `packages/client/src/app/LobbyScreen.tsx` — depends on T080, T081
+- [X] T085 [US1] Wire `HomeScreen` "Criar Partida" and "Entrar em Partida" buttons to navigate to their respective screens in `packages/client/src/app/HomeScreen.tsx` — depends on T063, T082, T083
+- [X] T086 [US1] Wire online-mode glue (subscribe `GameScreen` to `view-store`; map `GameScreen.onIntent` to `socket.emit('move:lay'|'move:draw'|'move:pass', { moveId: uuid(), ... })`) in `packages/client/src/net/online-runner.ts` — depends on T064, T080, T081
+- [X] T087 [US1] Wire end-of-match navigation (on `match:ended`, transition to `EndScreen`; on `EndScreen.onHome`, return to `HomeScreen` and clear view-store) — depends on T085, T086
 
 **Checkpoint**: Two browser tabs (or two devices) can play a complete online 2-player match end-to-end. The two-player smoke test in `quickstart.md` passes.
 

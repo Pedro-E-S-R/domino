@@ -128,9 +128,18 @@ export function useOnlineSession(serverUrl: string): {
         s.on('match:ended', (evt: MatchEndedEvent) =>
           dispatch({ type: 'MATCH_ENDED', result: evt.result, view: evt.view }),
         );
-        s.on('error', (evt: ErrorPayload) =>
-          dispatch({ type: 'ERROR_TOAST', message: evt.message }),
-        );
+        s.on('error', (evt: ErrorPayload) => {
+          if (evt.code === 'RECONNECT_WINDOW_EXPIRED') {
+            dispatch({ type: 'CLEAR_MATCH' });
+            dispatch({ type: 'NAV', screen: 'home' });
+            dispatch({
+              type: 'ERROR_TOAST',
+              message: 'Você ficou ausente por muito tempo e a partida continuou sem você.',
+            });
+            return;
+          }
+          dispatch({ type: 'ERROR_TOAST', message: evt.message });
+        });
       } catch (err) {
         if (!cancelled) dispatch({ type: 'ERROR_TOAST', message: `Falha de conexão: ${String(err)}` });
       }

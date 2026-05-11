@@ -73,14 +73,19 @@ export function LobbyScreen({
                   player.ready ? 'bg-primary-fixed/40 border border-primary' : 'bg-white/60'
                 }`}
               >
-                <Avatar avatarId={player.avatarId} displayName={player.displayName} size="md" />
+                <Avatar
+                  avatarId={player.avatarId}
+                  displayName={player.displayName}
+                  size="md"
+                  connected={player.connected}
+                />
                 <div className="flex-1">
                   <div className="font-label-lg text-rich-wood">{player.displayName}</div>
                   <div className="text-label-sm text-secondary">
-                    {player.ready ? 'Pronto' : 'Aguardando…'}
+                    {!player.connected ? 'Desconectado' : player.ready ? 'Pronto' : 'Aguardando…'}
                   </div>
                 </div>
-                {player.ready && (
+                {player.ready && player.connected && (
                   <span className="material-symbols-outlined text-primary">check_circle</span>
                 )}
               </li>

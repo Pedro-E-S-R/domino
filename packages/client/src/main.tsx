@@ -1,18 +1,27 @@
-import { StrictMode } from 'react';
+import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import type { PlayerCount, PublicMatchView } from '@domino/contracts';
 import { CreateMatchScreen } from './app/CreateMatchScreen.js';
 import { EndScreen } from './app/EndScreen.js';
 import { GameScreen, type GameIntent } from './app/GameScreen.js';
 import { HomeScreen } from './app/HomeScreen.js';
 import { JoinMatchScreen } from './app/JoinMatchScreen.js';
 import { LobbyScreen } from './app/LobbyScreen.js';
+import { OfflineSetupScreen } from './app/OfflineSetupScreen.js';
 import { RulesScreen } from './app/RulesScreen.js';
 import { useOnlineSession } from './net/online-store.js';
-import type { PublicMatchView } from '@domino/contracts';
+import { useOfflineGame } from './offline/useOfflineGame.js';
 import './styles/index.css';
 
 const SERVER_URL =
   (import.meta.env['VITE_SERVER_URL'] as string | undefined) ?? 'http://localhost:4123';
+
+type AppMode =
+  | { kind: 'home' }
+  | { kind: 'rules' }
+  | { kind: 'online' }
+  | { kind: 'offline-setup' }
+  | { kind: 'offline-game'; playerCount: PlayerCount; nonce: number };
 
 function ErrorToast({ message, onDismiss }: { message: string; onDismiss(): void }): JSX.Element {
   return (
@@ -38,28 +47,28 @@ function amReadyIn(view: PublicMatchView): boolean {
   return view.players[0]?.ready === true;
 }
 
-function App(): JSX.Element {
+function OnlineApp({ onLeaveOnline }: { onLeaveOnline(): void }): JSX.Element {
   const { state, actions } = useOnlineSession(SERVER_URL);
+
   let body: JSX.Element;
   switch (state.screen) {
     case 'home':
       body = (
-        <HomeScreen
-          onCreate={() => actions.nav('create')}
-          onJoin={() => actions.nav('join')}
-          onOffline={() => actions.nav('game')}
-          onRules={() => actions.nav('rules')}
-        />
+        <main className="min-h-screen flex items-center justify-center text-rich-wood">
+          <button onClick={onLeaveOnline} className="text-primary underline font-label-lg">
+            Voltar ao início
+          </button>
+        </main>
       );
       break;
     case 'rules':
-      body = <RulesScreen onHome={() => actions.nav('home')} />;
+      body = <RulesScreen onHome={onLeaveOnline} />;
       break;
     case 'create':
       body = (
         <CreateMatchScreen
           onCreate={(opts) => actions.createMatch(opts)}
-          onBack={() => actions.nav('home')}
+          onBack={onLeaveOnline}
         />
       );
       break;
@@ -67,7 +76,7 @@ function App(): JSX.Element {
       body = (
         <JoinMatchScreen
           onJoin={(code) => actions.joinMatch(code)}
-          onBack={() => actions.nav('home')}
+          onBack={onLeaveOnline}
         />
       );
       break;
@@ -87,7 +96,10 @@ function App(): JSX.Element {
             amReady={amReadyIn(state.view)}
             onToggleReady={actions.toggleReady}
             onStart={actions.startMatch}
-            onLeave={actions.goHome}
+            onLeave={() => {
+              actions.leaveMatch();
+              onLeaveOnline();
+            }}
           />
         );
       }
@@ -122,14 +134,13 @@ function App(): JSX.Element {
             result={state.result}
             players={state.view.players}
             canRematch={false}
-            onRematch={actions.goHome}
-            onHome={actions.goHome}
+            onRematch={onLeaveOnline}
+            onHome={onLeaveOnline}
           />
         );
       }
       break;
   }
-
   return (
     <>
       {body}
@@ -138,6 +149,88 @@ function App(): JSX.Element {
       )}
     </>
   );
+}
+
+function OfflineApp({
+  playerCount,
+  nonce,
+  onRestart,
+  onHome,
+}: {
+  playerCount: PlayerCount;
+  nonce: number;
+  onRestart(): void;
+  onHome(): void;
+}): JSX.Element {
+  void nonce;
+  const { snapshot, layTile, drawTile, passTurn } = useOfflineGame(playerCount);
+
+  if (snapshot.result !== null) {
+    return (
+      <EndScreen
+        result={snapshot.result}
+        players={snapshot.view.players}
+        canRematch
+        onRematch={onRestart}
+        onHome={onHome}
+      />
+    );
+  }
+
+  const onIntent = (intent: GameIntent): void => {
+    if (intent.type === 'LAY') layTile(intent.tileId, intent.end);
+    else if (intent.type === 'DRAW') drawTile();
+    else passTurn();
+  };
+  return <GameScreen view={snapshot.view} me={snapshot.me} onIntent={onIntent} />;
+}
+
+function App(): JSX.Element {
+  const [mode, setMode] = useState<AppMode>({ kind: 'home' });
+  const [onlineEntry, setOnlineEntry] = useState<'create' | 'join'>('create');
+  void onlineEntry;
+
+  switch (mode.kind) {
+    case 'home':
+      return (
+        <HomeScreen
+          onCreate={() => {
+            setOnlineEntry('create');
+            setMode({ kind: 'online' });
+          }}
+          onJoin={() => {
+            setOnlineEntry('join');
+            setMode({ kind: 'online' });
+          }}
+          onOffline={() => setMode({ kind: 'offline-setup' })}
+          onRules={() => setMode({ kind: 'rules' })}
+        />
+      );
+    case 'rules':
+      return <RulesScreen onHome={() => setMode({ kind: 'home' })} />;
+    case 'online':
+      return <OnlineApp onLeaveOnline={() => setMode({ kind: 'home' })} />;
+    case 'offline-setup':
+      return (
+        <OfflineSetupScreen
+          onStart={(playerCount) =>
+            setMode({ kind: 'offline-game', playerCount, nonce: Date.now() })
+          }
+          onBack={() => setMode({ kind: 'home' })}
+        />
+      );
+    case 'offline-game':
+      return (
+        <OfflineApp
+          playerCount={mode.playerCount}
+          nonce={mode.nonce}
+          onRestart={() =>
+            setMode({ kind: 'offline-game', playerCount: mode.playerCount, nonce: Date.now() })
+          }
+          onHome={() => setMode({ kind: 'home' })}
+        />
+      );
+  }
 }
 
 const rootEl = document.getElementById('root');

@@ -13,8 +13,14 @@ import {
   type LastAction,
   type SessionToken,
 } from '@domino/contracts';
-import { createInitialState, reduce, type GameAction, type Seat } from '@domino/engine';
-import type { RoomRegistry, SeatRecord } from '../rooms/registry.js';
+import {
+  chooseAutoAction,
+  createInitialState,
+  reduce,
+  type GameAction,
+  type Seat,
+} from '@domino/engine';
+import type { Match, RoomRegistry, SeatRecord } from '../rooms/registry.js';
 import {
   broadcastMatchEnded,
   broadcastMatchState,
@@ -23,16 +29,20 @@ import {
 } from './broadcast.js';
 import type { SocketData } from '../io.js';
 
-const TURN_TIMEOUT_MS = 30_000;
+export const DEFAULT_TURN_DURATION_MS = 30_000;
+export const DEFAULT_RECONNECT_WINDOW_MS = 5 * 60 * 1000;
 
 export interface HandlerContext {
   readonly io: SocketIOServer;
   readonly registry: RoomRegistry;
   readonly logger: Logger;
+  readonly turnDurationMs?: number;
+  readonly reconnectWindowMs?: number;
 }
 
 export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
   const { io, registry, logger } = ctx;
+  const reconnectWindowMs = ctx.reconnectWindowMs ?? DEFAULT_RECONNECT_WINDOW_MS;
   const data = socket.data as SocketData;
   const token: SessionToken = data.sessionToken;
 
@@ -40,10 +50,24 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
   if (existingMatch) {
     const seat = registry.seatOf(existingMatch, token);
     if (seat) {
+      if (
+        seat.disconnectedAt !== null &&
+        Date.now() - seat.disconnectedAt > reconnectWindowMs
+      ) {
+        socket.emit('error', {
+          code: 'RECONNECT_WINDOW_EXPIRED',
+          message: 'Você ficou ausente por muito tempo e a partida continuou sem você.',
+        });
+        setTimeout(() => socket.disconnect(true), 100);
+        return;
+      }
       seat.socketId = socket.id;
       seat.disconnectedAt = null;
       registry.touch(existingMatch);
       broadcastRoomState(io, existingMatch);
+      if (existingMatch.status === 'playing' && existingMatch.game) {
+        broadcastMatchState(io, existingMatch, null);
+      }
     }
   }
 
@@ -151,7 +175,7 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
     const game = createInitialState(seed, match.playerCount);
     match.game = game;
     match.status = 'playing';
-    match.turnDeadlineMs = Date.now() + TURN_TIMEOUT_MS;
+    match.turnDeadlineMs = Date.now() + turnDurationMs(ctx);
     registry.touch(match);
 
     logger.info({ roomCode: match.roomCode, seed, opener: game.opener }, 'match started');
@@ -164,11 +188,12 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
       });
     }
     broadcastMatchState(io, match, null);
+    armTurnTimer(ctx, match);
   });
 
-  socket.on('move:lay', (raw: unknown) => handleMove(socket, ctx, token, raw, 'LAY'));
-  socket.on('move:draw', (raw: unknown) => handleMove(socket, ctx, token, raw, 'DRAW'));
-  socket.on('move:pass', (raw: unknown) => handleMove(socket, ctx, token, raw, 'PASS'));
+  socket.on('move:lay', (raw: unknown) => handleMove(ctx, token, raw, 'LAY', socket.id));
+  socket.on('move:draw', (raw: unknown) => handleMove(ctx, token, raw, 'DRAW', socket.id));
+  socket.on('move:pass', (raw: unknown) => handleMove(ctx, token, raw, 'PASS', socket.id));
 
   socket.on('disconnect', (reason) => {
     logger.info({ id: socket.id, reason }, 'socket disconnected');
@@ -185,88 +210,152 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
   });
 }
 
+function turnDurationMs(ctx: HandlerContext): number {
+  return ctx.turnDurationMs ?? DEFAULT_TURN_DURATION_MS;
+}
+
+function clearTurnTimer(match: Match): void {
+  if (match.turnTimer) {
+    clearTimeout(match.turnTimer);
+    match.turnTimer = null;
+  }
+}
+
+function armTurnTimer(ctx: HandlerContext, match: Match): void {
+  clearTurnTimer(match);
+  if (match.status !== 'playing' || !match.game || match.game.phase === 'ended') {
+    return;
+  }
+  const duration = turnDurationMs(ctx);
+  match.turnDeadlineMs = Date.now() + duration;
+  match.turnTimer = setTimeout(() => {
+    fireAutoAction(ctx, match);
+  }, duration);
+}
+
+function fireAutoAction(ctx: HandlerContext, match: Match): void {
+  if (match.status !== 'playing' || !match.game) return;
+  const seat = match.game.turn;
+  const action = chooseAutoAction(match.game, seat);
+  if (action === null) return;
+  applyEngineAction(ctx, match, action);
+}
+
+function applyEngineAction(ctx: HandlerContext, match: Match, action: GameAction): void {
+  const { io, registry, logger } = ctx;
+  if (!match.game) return;
+  const result = reduce(match.game, action);
+  if (!result.ok) {
+    logger.warn({ roomCode: match.roomCode, error: result.error }, 'auto-action rejected');
+    return;
+  }
+  match.game = result.state;
+  registry.touch(match);
+
+  const lastAction: LastAction =
+    action.type === 'LAY'
+      ? { actor: action.actor, kind: 'LAY', tileId: action.tileId, end: action.end }
+      : action.type === 'DRAW'
+        ? { actor: action.actor, kind: 'DRAW' }
+        : action.type === 'PASS'
+          ? { actor: action.actor, kind: 'PASS' }
+          : { actor: 0 as Seat, kind: 'PASS' };
+
+  broadcastMatchState(io, match, lastAction);
+
+  if (result.state.phase === 'ended') {
+    clearTurnTimer(match);
+    match.status = 'ended';
+    match.turnDeadlineMs = null;
+    logger.info({ roomCode: match.roomCode, outcome: result.state.result?.outcome.kind }, 'match ended');
+    broadcastMatchEnded(io, match);
+  } else {
+    armTurnTimer(ctx, match);
+  }
+}
+
 function handleMove(
-  socket: Socket,
   ctx: HandlerContext,
   token: SessionToken,
   raw: unknown,
   kind: 'LAY' | 'DRAW' | 'PASS',
+  socketId: string,
 ): void {
   const { io, registry, logger } = ctx;
+  void logger;
 
   let parsedMoveId: string;
   let action: GameAction;
   if (kind === 'LAY') {
     const r = MoveLayPayloadSchema.safeParse(raw);
     if (!r.success) {
-      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Jogada inválida.');
+      sendError(io, socketId, 'INVALID_PAYLOAD', 'Jogada inválida.');
       return;
     }
     parsedMoveId = r.data.moveId;
     const match = registry.findByToken(token);
     if (!match) {
-      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+      sendError(io, socketId, 'NOT_IN_MATCH', 'Você não está em uma partida.');
       return;
     }
     const seat = registry.seatOf(match, token);
     if (!seat) {
-      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
+      sendError(io, socketId, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
       return;
     }
     action = { type: 'LAY', actor: seat.seat, tileId: r.data.tileId, end: r.data.end };
-    applyMove(io, registry, logger, match, seat, action, parsedMoveId);
+    applyMove(ctx, match, seat, action, parsedMoveId);
     return;
   }
   if (kind === 'DRAW') {
     const r = MoveDrawPayloadSchema.safeParse(raw);
     if (!r.success) {
-      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Compra inválida.');
+      sendError(io, socketId, 'INVALID_PAYLOAD', 'Compra inválida.');
       return;
     }
     parsedMoveId = r.data.moveId;
     const match = registry.findByToken(token);
     if (!match) {
-      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+      sendError(io, socketId, 'NOT_IN_MATCH', 'Você não está em uma partida.');
       return;
     }
     const seat = registry.seatOf(match, token);
     if (!seat) {
-      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
+      sendError(io, socketId, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
       return;
     }
     action = { type: 'DRAW', actor: seat.seat };
-    applyMove(io, registry, logger, match, seat, action, parsedMoveId);
+    applyMove(ctx, match, seat, action, parsedMoveId);
     return;
   }
   const r = MovePassPayloadSchema.safeParse(raw);
   if (!r.success) {
-    sendError(io, socket.id, 'INVALID_PAYLOAD', 'Passe inválido.');
+    sendError(io, socketId, 'INVALID_PAYLOAD', 'Passe inválido.');
     return;
   }
   parsedMoveId = r.data.moveId;
   const match = registry.findByToken(token);
   if (!match) {
-    sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+    sendError(io, socketId, 'NOT_IN_MATCH', 'Você não está em uma partida.');
     return;
   }
   const seat = registry.seatOf(match, token);
   if (!seat) {
-    sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
+    sendError(io, socketId, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
     return;
   }
   action = { type: 'PASS', actor: seat.seat };
-  applyMove(io, registry, logger, match, seat, action, parsedMoveId);
+  applyMove(ctx, match, seat, action, parsedMoveId);
 }
 
 function applyMove(
-  io: SocketIOServer,
-  registry: RoomRegistry,
-  logger: Logger,
-  match: ReturnType<RoomRegistry['findByToken']> & object,
+  ctx: HandlerContext,
+  match: Match,
   seat: SeatRecord,
   action: GameAction,
   moveId: string,
 ): void {
+  const { io, registry, logger } = ctx;
   if (match.status !== 'playing' || !match.game) {
     sendError(io, seat.socketId ?? '', 'MATCH_ENDED', 'A partida não está em andamento.');
     return;
@@ -283,8 +372,6 @@ function applyMove(
   }
   match.game = result.state;
   match.processedMoveIds.add(moveId);
-  match.turnDeadlineMs =
-    result.state.phase === 'ended' ? null : Date.now() + TURN_TIMEOUT_MS;
   registry.touch(match);
 
   let lastAction: LastAction;
@@ -301,9 +388,13 @@ function applyMove(
   broadcastMatchState(io, match, lastAction);
 
   if (result.state.phase === 'ended') {
+    clearTurnTimer(match);
     match.status = 'ended';
+    match.turnDeadlineMs = null;
     logger.info({ roomCode: match.roomCode, outcome: result.state.result?.outcome.kind }, 'match ended');
     broadcastMatchEnded(io, match);
+  } else {
+    armTurnTimer(ctx, match);
   }
 }
 

@@ -11,6 +11,8 @@ export interface IoOptions {
   readonly sessions: SessionStore;
   readonly registry: RoomRegistry;
   readonly logger: Logger;
+  readonly turnDurationMs?: number;
+  readonly reconnectWindowMs?: number;
 }
 
 export interface SocketData {
@@ -49,7 +51,15 @@ export function createSocketServer(opts: IoOptions): SocketIOServer {
   io.on('connection', (socket) => {
     const data = socket.data as SocketData;
     logger.info({ id: socket.id, token: data.sessionToken.slice(0, 8) }, 'socket connected');
-    attachHandlers(socket, { io, registry, logger });
+    attachHandlers(socket, {
+      io,
+      registry,
+      logger,
+      ...(opts.turnDurationMs !== undefined ? { turnDurationMs: opts.turnDurationMs } : {}),
+      ...(opts.reconnectWindowMs !== undefined
+        ? { reconnectWindowMs: opts.reconnectWindowMs }
+        : {}),
+    });
   });
 
   return io;

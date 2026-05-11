@@ -27,6 +27,7 @@ export interface Match {
   seats: (SeatRecord | null)[];
   game: GameState | null;
   turnDeadlineMs: number | null;
+  turnTimer: ReturnType<typeof setTimeout> | null;
   createdAt: number;
   lastActivityAt: number;
   processedMoveIds: Set<MoveId>;
@@ -73,6 +74,7 @@ export class RoomRegistry {
       seats,
       game: null,
       turnDeadlineMs: null,
+      turnTimer: null,
       createdAt: now,
       lastActivityAt: now,
       processedMoveIds: new Set(),
@@ -161,6 +163,10 @@ export class RoomRegistry {
   }
 
   dispose(match: Match): void {
+    if (match.turnTimer) {
+      clearTimeout(match.turnTimer);
+      match.turnTimer = null;
+    }
     this.byCode.delete(match.roomCode);
     this.byId.delete(match.id);
     for (const s of match.seats) {

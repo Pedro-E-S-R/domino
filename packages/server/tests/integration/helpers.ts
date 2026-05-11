@@ -24,14 +24,26 @@ export interface TestServer {
   close(): Promise<void>;
 }
 
-export async function startTestServer(): Promise<TestServer> {
+export interface StartTestServerOptions {
+  turnDurationMs?: number;
+  reconnectWindowMs?: number;
+}
+
+export async function startTestServer(opts: StartTestServerOptions = {}): Promise<TestServer> {
   const config: ServerConfig = { mode: 'online', port: 0, host: '127.0.0.1' };
   const sessions = new SessionStore();
   const registry = new RoomRegistry();
   const logger = createLogger({ level: 'silent' });
   const app = createHttpApp({ config, sessions, logger });
   const httpServer = createServer(app);
-  createSocketServer({ httpServer, sessions, registry, logger });
+  createSocketServer({
+    httpServer,
+    sessions,
+    registry,
+    logger,
+    ...(opts.turnDurationMs !== undefined ? { turnDurationMs: opts.turnDurationMs } : {}),
+    ...(opts.reconnectWindowMs !== undefined ? { reconnectWindowMs: opts.reconnectWindowMs } : {}),
+  });
   await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve));
   const addr = httpServer.address() as AddressInfo;
   return {

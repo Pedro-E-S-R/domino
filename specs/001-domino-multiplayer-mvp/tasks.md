@@ -177,12 +177,12 @@ Multi-package monorepo layout (see `plan.md` → Project Structure):
 
 **Independent Test**: Disable the network on a device, tap "Jogar Offline", complete a round; the same end-of-match screen appears as in online play; no network errors are shown anywhere.
 
-- [ ] T088 [US2] Implement `OfflineSetupScreen` (pick 2 or 4 players; the human is always seat 0; the rest are bots) in `packages/client/src/app/OfflineSetupScreen.tsx` — depends on T058
-- [ ] T089 [US2] Implement `OfflineRunner` driving the local engine: maintains `GameState`, exposes a `view` (built by the same projector as the server's, just locally), routes the human's intent to the reducer, and on bot turns calls `chooseAutoAction` and applies it after a brief delay (~600 ms for UX) in `packages/client/src/offline/runner.ts` — depends on T036, T064
-- [ ] T090 [US2] Wire `HomeScreen` "Jogar Offline" button to navigate to `OfflineSetupScreen` and from there into `GameScreen` driven by `OfflineRunner` in `packages/client/src/app/HomeScreen.tsx` — depends on T088, T089
-- [ ] T091 [US2] Implement offline end-of-match flow: on `phase === 'ended'`, navigate to `EndScreen`; "Jogar Novamente" creates a new `OfflineRunner` with a new seed; "Voltar" returns to home — depends on T089, T065
-- [ ] T092 [US2] Write offline smoke test that runs `OfflineRunner` headless for a deterministic seed against 1 bot and asserts the final outcome matches the expected fixture in `packages/client/src/offline/runner.test.ts`
-- [ ] T093 [US2] Manual smoke (recorded in `quickstart.md`): airplane mode → offline match → reach result screen without any network error toast
+- [X] T088 [US2] Implement `OfflineSetupScreen` (pick 2 or 4 players; the human is always seat 0; the rest are bots) in `packages/client/src/app/OfflineSetupScreen.tsx` — depends on T058
+- [X] T089 [US2] Implement `OfflineRunner` driving the local engine: maintains `GameState`, exposes a `view` (built by the same projector as the server's, just locally), routes the human's intent to the reducer, and on bot turns calls `chooseAutoAction` and applies it after a brief delay (~600 ms for UX) in `packages/client/src/offline/runner.ts` — depends on T036, T064
+- [X] T090 [US2] Wire `HomeScreen` "Jogar Offline" button to navigate to `OfflineSetupScreen` and from there into `GameScreen` driven by `OfflineRunner` in `packages/client/src/app/HomeScreen.tsx` — depends on T088, T089
+- [X] T091 [US2] Implement offline end-of-match flow: on `phase === 'ended'`, navigate to `EndScreen`; "Jogar Novamente" creates a new `OfflineRunner` with a new seed; "Voltar" returns to home — depends on T089, T065
+- [X] T092 [US2] Write offline smoke test that runs `OfflineRunner` headless for a deterministic seed against 1 bot and asserts the final outcome matches the expected fixture in `packages/client/src/offline/runner.test.ts`
+- [X] T093 [US2] Manual smoke (recorded in `quickstart.md`): airplane mode → offline match → reach result screen without any network error toast
 
 **Checkpoint**: Offline play works without a network. The engine is exercised entirely client-side via the same code path as the server's reducer.
 
@@ -194,11 +194,11 @@ Multi-package monorepo layout (see `plan.md` → Project Structure):
 
 **Independent Test**: Four browser tabs (or four devices) play through one 4-player round; turn order goes 0 → 1 → 2 → 3 → 0; the result screen lists all four seats.
 
-- [ ] T094 [P] [US3] Extend `CreateMatchScreen` player-count picker to allow 4 in `packages/client/src/app/CreateMatchScreen.tsx`
-- [ ] T095 [P] [US3] Extend `LobbyScreen` to render 4 seats with the host always at seat 0 in `packages/client/src/app/LobbyScreen.tsx`
-- [ ] T096 [US3] Update `GameScreen` board layout to position three opponents (top, left, right) in addition to the local hand at the bottom in `packages/client/src/app/GameScreen.tsx` — depends on T064
-- [ ] T097 [US3] Write server integration test that plays a deterministic 4-player match (fixed seed; scripted moves; asserts identical final view on all four sockets and correct turn rotation 0→1→2→3→0) in `packages/server/tests/integration/four-player-match.test.ts`
-- [ ] T098 [US3] Write view-projection test that the boneyard count is never replaced by its array contents in any 4-player snapshot, and that hand contents for seat N never appear in messages addressed to other seats, in `packages/server/tests/integration/view-filter-4p.test.ts`
+- [X] T094 [P] [US3] Extend `CreateMatchScreen` player-count picker to allow 4 in `packages/client/src/app/CreateMatchScreen.tsx`
+- [X] T095 [P] [US3] Extend `LobbyScreen` to render 4 seats with the host always at seat 0 in `packages/client/src/app/LobbyScreen.tsx`
+- [X] T096 [US3] Update `GameScreen` board layout to position three opponents (top, left, right) in addition to the local hand at the bottom in `packages/client/src/app/GameScreen.tsx` — depends on T064
+- [X] T097 [US3] Write server integration test that plays a deterministic 4-player match (fixed seed; scripted moves; asserts identical final view on all four sockets and correct turn rotation 0→1→2→3→0) in `packages/server/tests/integration/four-player-match.test.ts`
+- [X] T098 [US3] Write view-projection test that the boneyard count is never replaced by its array contents in any 4-player snapshot, and that hand contents for seat N never appear in messages addressed to other seats, in `packages/server/tests/integration/view-filter-4p.test.ts`
 
 **Checkpoint**: 4-player online matches complete cleanly. View-filter tests prove hidden info doesn't leak with three opponents.
 
@@ -242,22 +242,22 @@ Multi-package monorepo layout (see `plan.md` → Project Structure):
 
 ### Server (timers + reconnect)
 
-- [ ] T110 [P] [US5] Implement turn timer (per-match `setTimeout` armed on every turn change; expiry calls auto-action policy) in `packages/server/src/timers/turn-timer.ts`
-- [ ] T111 [US5] Implement auto-action policy in the server using `chooseAutoAction` from the engine; wire it to the turn timer's expiry handler in `packages/server/src/transport/handlers.ts` — depends on T034, T110
-- [ ] T112 [P] [US5] Implement disconnect tracking in `SeatRecord`: on Socket.IO `disconnect`, set `disconnectedAt = Date.now()` and `socketId = null`; broadcast `room:state` so peers see the gray-out, in `packages/server/src/transport/handlers.ts`
-- [ ] T113 [US5] Implement reconnect rebinding: on `connect` with a `sessionToken` bound to a seat whose `disconnectedAt` is within 5 minutes, rebind `socketId`, clear `disconnectedAt`, and emit a filtered `room:state` snapshot to the returning client; depends on T112
-- [ ] T114 [US5] Implement out-of-window handling: if `now - disconnectedAt > 5 min`, treat the seat as "abandoned" — keep auto-playing on the seat until the round ends; reject the returning client with `error: { code: 'RECONNECT_WINDOW_EXPIRED' }` — depends on T113
-- [ ] T115 [US5] Ensure `match:turn` and `match:state` carry the correct `turnDeadlineMs` after auto-actions, reconnects, and disconnects in `packages/server/src/transport/broadcast.ts`
-- [ ] T116 [US5] Write integration test for turn timeout: scripted match, ignore turn on seat 1; assert auto-action fires within 35 s with the lowest-pip legal play in `packages/server/tests/integration/turn-timeout.test.ts`
-- [ ] T117 [US5] Write integration test for reconnect-within-window: disconnect a socket mid-round; reconnect with same `sessionToken` 30 s later; assert hand identical, seat identical, view consistent in `packages/server/tests/integration/reconnect-within.test.ts`
-- [ ] T118 [US5] Write integration test for reconnect-beyond-window: disconnect; fast-forward server clock 6 min; reconnect; assert `RECONNECT_WINDOW_EXPIRED`; assert match continued auto-playing the seat in `packages/server/tests/integration/reconnect-expired.test.ts`
+- [X] T110 [P] [US5] Implement turn timer (per-match `setTimeout` armed on every turn change; expiry calls auto-action policy) in `packages/server/src/timers/turn-timer.ts`
+- [X] T111 [US5] Implement auto-action policy in the server using `chooseAutoAction` from the engine; wire it to the turn timer's expiry handler in `packages/server/src/transport/handlers.ts` — depends on T034, T110
+- [X] T112 [P] [US5] Implement disconnect tracking in `SeatRecord`: on Socket.IO `disconnect`, set `disconnectedAt = Date.now()` and `socketId = null`; broadcast `room:state` so peers see the gray-out, in `packages/server/src/transport/handlers.ts`
+- [X] T113 [US5] Implement reconnect rebinding: on `connect` with a `sessionToken` bound to a seat whose `disconnectedAt` is within 5 minutes, rebind `socketId`, clear `disconnectedAt`, and emit a filtered `room:state` snapshot to the returning client; depends on T112
+- [X] T114 [US5] Implement out-of-window handling: if `now - disconnectedAt > 5 min`, treat the seat as "abandoned" — keep auto-playing on the seat until the round ends; reject the returning client with `error: { code: 'RECONNECT_WINDOW_EXPIRED' }` — depends on T113
+- [X] T115 [US5] Ensure `match:turn` and `match:state` carry the correct `turnDeadlineMs` after auto-actions, reconnects, and disconnects in `packages/server/src/transport/broadcast.ts`
+- [X] T116 [US5] Write integration test for turn timeout: scripted match, ignore turn on seat 1; assert auto-action fires within 35 s with the lowest-pip legal play in `packages/server/tests/integration/turn-timeout.test.ts`
+- [X] T117 [US5] Write integration test for reconnect-within-window: disconnect a socket mid-round; reconnect with same `sessionToken` 30 s later; assert hand identical, seat identical, view consistent in `packages/server/tests/integration/reconnect-within.test.ts`
+- [X] T118 [US5] Write integration test for reconnect-beyond-window: disconnect; fast-forward server clock 6 min; reconnect; assert `RECONNECT_WINDOW_EXPIRED`; assert match continued auto-playing the seat in `packages/server/tests/integration/reconnect-expired.test.ts`
 
 ### Client (UI + reconnect)
 
-- [ ] T119 [P] [US5] Implement turn-clock countdown UI in `TurnIndicator` using `turnDeadlineMs` (1 Hz tick; warns when <5 s) in `packages/client/src/components/TurnIndicator.tsx`
-- [ ] T120 [P] [US5] Implement automatic reconnect attempt on `disconnect` event: re-`connect()` with the same `sessionToken`; on success the server's `room:state` re-syncs the view-store, in `packages/client/src/net/socket.ts`
-- [ ] T121 [US5] Implement disconnected-peer indicator in `LobbyScreen` and `GameScreen` (avatar grayed out when `PlayerSummary.connected === false`) — depends on T084, T064
-- [ ] T122 [US5] Handle `RECONNECT_WINDOW_EXPIRED` on the client by navigating to `HomeScreen` with a "Você ficou ausente por muito tempo" toast in pt-BR — depends on T086
+- [X] T119 [P] [US5] Implement turn-clock countdown UI in `TurnIndicator` using `turnDeadlineMs` (1 Hz tick; warns when <5 s) in `packages/client/src/components/TurnIndicator.tsx`
+- [X] T120 [P] [US5] Implement automatic reconnect attempt on `disconnect` event: re-`connect()` with the same `sessionToken`; on success the server's `room:state` re-syncs the view-store, in `packages/client/src/net/socket.ts`
+- [X] T121 [US5] Implement disconnected-peer indicator in `LobbyScreen` and `GameScreen` (avatar grayed out when `PlayerSummary.connected === false`) — depends on T084, T064
+- [X] T122 [US5] Handle `RECONNECT_WINDOW_EXPIRED` on the client by navigating to `HomeScreen` with a "Você ficou ausente por muito tempo" toast in pt-BR — depends on T086
 
 **Checkpoint**: Resilience tests pass. Turn timer fires deterministically; reconnect within window restores state; out-of-window is handled cleanly.
 

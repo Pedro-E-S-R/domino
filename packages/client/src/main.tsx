@@ -49,12 +49,14 @@ function amReadyIn(view: PublicMatchView): boolean {
 
 function OnlineApp({
   serverUrl,
+  entryScreen,
   onLeaveOnline,
 }: {
   serverUrl: string;
+  entryScreen: 'create' | 'join';
   onLeaveOnline(): void;
 }): JSX.Element {
-  const { state, actions } = useOnlineSession(serverUrl);
+  const { state, actions } = useOnlineSession(serverUrl, { initialScreen: entryScreen });
 
   let body: JSX.Element;
   switch (state.screen) {
@@ -194,11 +196,16 @@ function OfflineApp({
 function App(): JSX.Element {
   const [mode, setMode] = useState<AppMode>({ kind: 'home' });
   const [serverUrl, setServerUrl] = useState<string>(() => resolveServerUrl());
+  const [entryScreen, setEntryScreen] = useState<'create' | 'join'>('create');
 
   const goHome = useCallback(() => setMode({ kind: 'home' }), []);
+  const enterOnline = (which: 'create' | 'join'): void => {
+    setEntryScreen(which);
+    setMode({ kind: 'online' });
+  };
   const homeProps = {
-    onCreate: () => setMode({ kind: 'online' }),
-    onJoin: () => setMode({ kind: 'online' }),
+    onCreate: () => enterOnline('create'),
+    onJoin: () => enterOnline('join'),
     onOffline: () => setMode({ kind: 'offline-setup' }),
     onRules: () => setMode({ kind: 'rules' }),
     onServerConfig: () => setMode({ kind: 'server-config' }),
@@ -225,7 +232,14 @@ function App(): JSX.Element {
         />
       );
     case 'online':
-      return <OnlineApp key={serverUrl} serverUrl={serverUrl} onLeaveOnline={goHome} />;
+      return (
+        <OnlineApp
+          key={`${serverUrl}::${entryScreen}`}
+          serverUrl={serverUrl}
+          entryScreen={entryScreen}
+          onLeaveOnline={goHome}
+        />
+      );
     case 'offline-setup':
       return (
         <OfflineSetupScreen

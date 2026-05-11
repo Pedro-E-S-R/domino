@@ -99,11 +99,22 @@ function uuid(): string {
   });
 }
 
-export function useOnlineSession(serverUrl: string): {
+export interface UseOnlineSessionOptions {
+  initialScreen?: Screen;
+}
+
+export function useOnlineSession(
+  serverUrl: string,
+  options: UseOnlineSessionOptions = {},
+): {
   state: OnlineState;
   actions: OnlineActions;
 } {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const startScreen = options.initialScreen ?? 'home';
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    screen: startScreen,
+  });
   const [socket, setSocket] = useState<GameSocket | null>(null);
   const socketRef = useRef<GameSocket | null>(null);
 

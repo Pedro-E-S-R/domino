@@ -1,0 +1,35 @@
+import { createServer } from 'node:http';
+import { parseConfig } from './config.js';
+import { createLogger } from './observability/logger.js';
+import { createHttpApp } from './http.js';
+import { createSocketServer } from './io.js';
+import { SessionStore } from './sessions/token.js';
+
+async function main(): Promise<void> {
+  const config = parseConfig(process.argv.slice(2));
+  const logger = createLogger();
+  const sessions = new SessionStore();
+
+  const app = createHttpApp({ config, sessions, logger });
+  const httpServer = createServer(app);
+  createSocketServer({ httpServer, sessions, logger });
+
+  httpServer.listen(config.port, config.host, () => {
+    logger.info(
+      { mode: config.mode, host: config.host, port: config.port },
+      'Dominó Online server listening',
+    );
+  });
+
+  const shutdown = (): void => {
+    logger.info('shutting down');
+    httpServer.close(() => process.exit(0));
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}
+
+main().catch((err) => {
+  console.error('Fatal startup error:', err);
+  process.exit(1);
+});

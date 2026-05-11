@@ -1,0 +1,335 @@
+import { randomBytes } from 'node:crypto';
+import type { Logger } from 'pino';
+import type { Server as SocketIOServer, Socket } from 'socket.io';
+import {
+  MoveDrawPayloadSchema,
+  MoveLayPayloadSchema,
+  MovePassPayloadSchema,
+  RoomCreatePayloadSchema,
+  RoomJoinPayloadSchema,
+  RoomLeavePayloadSchema,
+  RoomReadyPayloadSchema,
+  RoomStartPayloadSchema,
+  type LastAction,
+  type SessionToken,
+} from '@domino/contracts';
+import { createInitialState, reduce, type GameAction, type Seat } from '@domino/engine';
+import type { RoomRegistry, SeatRecord } from '../rooms/registry.js';
+import {
+  broadcastMatchEnded,
+  broadcastMatchState,
+  broadcastRoomState,
+  sendError,
+} from './broadcast.js';
+import type { SocketData } from '../io.js';
+
+const TURN_TIMEOUT_MS = 30_000;
+
+export interface HandlerContext {
+  readonly io: SocketIOServer;
+  readonly registry: RoomRegistry;
+  readonly logger: Logger;
+}
+
+export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
+  const { io, registry, logger } = ctx;
+  const data = socket.data as SocketData;
+  const token: SessionToken = data.sessionToken;
+
+  const existingMatch = registry.findByToken(token);
+  if (existingMatch) {
+    const seat = registry.seatOf(existingMatch, token);
+    if (seat) {
+      seat.socketId = socket.id;
+      seat.disconnectedAt = null;
+      registry.touch(existingMatch);
+      broadcastRoomState(io, existingMatch);
+    }
+  }
+
+  socket.on('room:create', (raw: unknown) => {
+    const parsed = RoomCreatePayloadSchema.safeParse(raw);
+    if (!parsed.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Pedido de criação inválido.');
+      return;
+    }
+    const match = registry.create({
+      mode: parsed.data.mode,
+      playerCount: parsed.data.playerCount,
+      hostSessionToken: token,
+      hostSocketId: socket.id,
+    });
+    logger.info({ roomCode: match.roomCode, mode: match.mode, pc: match.playerCount }, 'room created');
+    broadcastRoomState(io, match);
+  });
+
+  socket.on('room:join', (raw: unknown) => {
+    const parsed = RoomJoinPayloadSchema.safeParse(raw);
+    if (!parsed.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Código de sala inválido.');
+      return;
+    }
+    const result = registry.join({
+      roomCode: parsed.data.roomCode,
+      sessionToken: token,
+      socketId: socket.id,
+    });
+    if ('error' in result) {
+      const msg =
+        result.error === 'ROOM_NOT_FOUND'
+          ? 'Sala não encontrada.'
+          : result.error === 'ROOM_FULL'
+            ? 'A sala está cheia.'
+            : 'A partida já começou.';
+      sendError(io, socket.id, result.error, msg);
+      return;
+    }
+    logger.info({ roomCode: result.match.roomCode, seat: result.seat }, 'player joined');
+    broadcastRoomState(io, result.match);
+  });
+
+  socket.on('room:ready', (raw: unknown) => {
+    const parsed = RoomReadyPayloadSchema.safeParse(raw);
+    if (!parsed.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Pronto inválido.');
+      return;
+    }
+    const match = registry.findByToken(token);
+    if (!match) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma sala.');
+      return;
+    }
+    if (match.status !== 'lobby') {
+      sendError(io, socket.id, 'ROOM_IN_PROGRESS', 'A partida já começou.');
+      return;
+    }
+    const seat = registry.seatOf(match, token);
+    if (!seat) return;
+    seat.ready = parsed.data.ready;
+    registry.touch(match);
+    broadcastRoomState(io, match);
+  });
+
+  socket.on('room:leave', (raw: unknown) => {
+    const parsed = RoomLeavePayloadSchema.safeParse(raw);
+    if (!parsed.success) return;
+    const match = registry.findByToken(token);
+    if (!match) return;
+    registry.removeBySessionToken(token);
+    if (registry.findByCode(match.roomCode)) {
+      broadcastRoomState(io, match);
+    }
+  });
+
+  socket.on('room:start', (raw: unknown) => {
+    const parsed = RoomStartPayloadSchema.safeParse(raw);
+    if (!parsed.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Iniciar inválido.');
+      return;
+    }
+    const match = registry.findByToken(token);
+    if (!match) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma sala.');
+      return;
+    }
+    if (match.hostSessionToken !== token) {
+      sendError(io, socket.id, 'NOT_HOST', 'Apenas o host pode iniciar.');
+      return;
+    }
+    if (match.status !== 'lobby') {
+      sendError(io, socket.id, 'ROOM_IN_PROGRESS', 'A partida já começou.');
+      return;
+    }
+    const allFilled = match.seats.every((s) => s !== null);
+    const allReady = match.seats.every((s) => s !== null && s.ready);
+    if (!allFilled || !allReady) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Todos os jogadores precisam estar prontos.');
+      return;
+    }
+
+    const seed = randomBytes(4).readUInt32LE(0);
+    const game = createInitialState(seed, match.playerCount);
+    match.game = game;
+    match.status = 'playing';
+    match.turnDeadlineMs = Date.now() + TURN_TIMEOUT_MS;
+    registry.touch(match);
+
+    logger.info({ roomCode: match.roomCode, seed, opener: game.opener }, 'match started');
+
+    for (const seat of match.seats) {
+      if (!seat || !seat.socketId) continue;
+      io.to(seat.socketId).emit('match:started', {
+        opener: game.opener as Seat,
+        turnDeadlineMs: match.turnDeadlineMs,
+      });
+    }
+    broadcastMatchState(io, match, null);
+  });
+
+  socket.on('move:lay', (raw: unknown) => handleMove(socket, ctx, token, raw, 'LAY'));
+  socket.on('move:draw', (raw: unknown) => handleMove(socket, ctx, token, raw, 'DRAW'));
+  socket.on('move:pass', (raw: unknown) => handleMove(socket, ctx, token, raw, 'PASS'));
+
+  socket.on('disconnect', (reason) => {
+    logger.info({ id: socket.id, reason }, 'socket disconnected');
+    const match = registry.findByToken(token);
+    if (!match) return;
+    const seat = registry.seatOf(match, token);
+    if (!seat) return;
+    if (seat.socketId === socket.id) {
+      seat.socketId = null;
+      seat.disconnectedAt = Date.now();
+      registry.touch(match);
+      broadcastRoomState(io, match);
+    }
+  });
+}
+
+function handleMove(
+  socket: Socket,
+  ctx: HandlerContext,
+  token: SessionToken,
+  raw: unknown,
+  kind: 'LAY' | 'DRAW' | 'PASS',
+): void {
+  const { io, registry, logger } = ctx;
+
+  let parsedMoveId: string;
+  let action: GameAction;
+  if (kind === 'LAY') {
+    const r = MoveLayPayloadSchema.safeParse(raw);
+    if (!r.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Jogada inválida.');
+      return;
+    }
+    parsedMoveId = r.data.moveId;
+    const match = registry.findByToken(token);
+    if (!match) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+      return;
+    }
+    const seat = registry.seatOf(match, token);
+    if (!seat) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
+      return;
+    }
+    action = { type: 'LAY', actor: seat.seat, tileId: r.data.tileId, end: r.data.end };
+    applyMove(io, registry, logger, match, seat, action, parsedMoveId);
+    return;
+  }
+  if (kind === 'DRAW') {
+    const r = MoveDrawPayloadSchema.safeParse(raw);
+    if (!r.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Compra inválida.');
+      return;
+    }
+    parsedMoveId = r.data.moveId;
+    const match = registry.findByToken(token);
+    if (!match) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+      return;
+    }
+    const seat = registry.seatOf(match, token);
+    if (!seat) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
+      return;
+    }
+    action = { type: 'DRAW', actor: seat.seat };
+    applyMove(io, registry, logger, match, seat, action, parsedMoveId);
+    return;
+  }
+  const r = MovePassPayloadSchema.safeParse(raw);
+  if (!r.success) {
+    sendError(io, socket.id, 'INVALID_PAYLOAD', 'Passe inválido.');
+    return;
+  }
+  parsedMoveId = r.data.moveId;
+  const match = registry.findByToken(token);
+  if (!match) {
+    sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+    return;
+  }
+  const seat = registry.seatOf(match, token);
+  if (!seat) {
+    sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não tem assento na partida.');
+    return;
+  }
+  action = { type: 'PASS', actor: seat.seat };
+  applyMove(io, registry, logger, match, seat, action, parsedMoveId);
+}
+
+function applyMove(
+  io: SocketIOServer,
+  registry: RoomRegistry,
+  logger: Logger,
+  match: ReturnType<RoomRegistry['findByToken']> & object,
+  seat: SeatRecord,
+  action: GameAction,
+  moveId: string,
+): void {
+  if (match.status !== 'playing' || !match.game) {
+    sendError(io, seat.socketId ?? '', 'MATCH_ENDED', 'A partida não está em andamento.');
+    return;
+  }
+  if (match.processedMoveIds.has(moveId)) {
+    broadcastMatchState(io, match, null);
+    return;
+  }
+  const result = reduce(match.game, action);
+  if (!result.ok) {
+    const code = result.error === 'NOT_YOUR_TURN' ? 'NOT_YOUR_TURN' : 'ILLEGAL_MOVE';
+    sendError(io, seat.socketId ?? '', code, errorMessageFor(result.error), { rule: result.error });
+    return;
+  }
+  match.game = result.state;
+  match.processedMoveIds.add(moveId);
+  match.turnDeadlineMs =
+    result.state.phase === 'ended' ? null : Date.now() + TURN_TIMEOUT_MS;
+  registry.touch(match);
+
+  let lastAction: LastAction;
+  if (action.type === 'LAY') {
+    lastAction = { actor: action.actor, kind: 'LAY', tileId: action.tileId, end: action.end };
+  } else if (action.type === 'DRAW') {
+    lastAction = { actor: action.actor, kind: 'DRAW' };
+  } else if (action.type === 'PASS') {
+    lastAction = { actor: action.actor, kind: 'PASS' };
+  } else {
+    return;
+  }
+
+  broadcastMatchState(io, match, lastAction);
+
+  if (result.state.phase === 'ended') {
+    match.status = 'ended';
+    logger.info({ roomCode: match.roomCode, outcome: result.state.result?.outcome.kind }, 'match ended');
+    broadcastMatchEnded(io, match);
+  }
+}
+
+function errorMessageFor(rule: string): string {
+  switch (rule) {
+    case 'TILE_NOT_IN_HAND':
+      return 'Você não tem essa peça.';
+    case 'TILE_DOES_NOT_MATCH_END':
+      return 'Essa peça não encaixa nessa ponta.';
+    case 'MUST_LAY_OPENER_TILE':
+      return 'Você precisa jogar a peça de abertura.';
+    case 'CANNOT_DRAW_HAS_LEGAL_MOVE':
+      return 'Você ainda pode jogar uma peça.';
+    case 'CANNOT_DRAW_EMPTY_BONEYARD':
+      return 'O monte está vazio.';
+    case 'CANNOT_PASS_HAS_LEGAL_MOVE':
+      return 'Você ainda pode jogar uma peça.';
+    case 'CANNOT_PASS_BONEYARD_NOT_EMPTY':
+      return 'Compre uma peça antes de passar.';
+    case 'NOT_YOUR_TURN':
+      return 'Não é sua vez.';
+    case 'WRONG_PHASE':
+      return 'Ação fora de fase.';
+    case 'MATCH_ENDED':
+      return 'A partida já terminou.';
+    default:
+      return 'Jogada ilegal.';
+  }
+}

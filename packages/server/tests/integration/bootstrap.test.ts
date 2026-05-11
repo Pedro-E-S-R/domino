@@ -7,6 +7,7 @@ import { createHttpApp } from '../../src/http.js';
 import { createSocketServer } from '../../src/io.js';
 import { createLogger } from '../../src/observability/logger.js';
 import { SessionStore } from '../../src/sessions/token.js';
+import { RoomRegistry } from '../../src/rooms/registry.js';
 import type { ServerConfig } from '../../src/config.js';
 
 let httpServer: HttpServer;
@@ -16,10 +17,11 @@ let sessions: SessionStore;
 beforeAll(async () => {
   const config: ServerConfig = { mode: 'online', port: 0, host: '127.0.0.1' };
   sessions = new SessionStore();
+  const registry = new RoomRegistry();
   const logger = createLogger({ level: 'silent' });
   const app = createHttpApp({ config, sessions, logger });
   httpServer = createServer(app);
-  createSocketServer({ httpServer, sessions, logger });
+  createSocketServer({ httpServer, sessions, registry, logger });
   await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve));
   const addr = httpServer.address() as AddressInfo;
   baseUrl = `http://127.0.0.1:${addr.port}`;

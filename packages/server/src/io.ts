@@ -3,10 +3,13 @@ import type { Server as HttpServer } from 'node:http';
 import type { Logger } from 'pino';
 import { PROTOCOL_VERSION, SocketAuthPayloadSchema, type SessionToken } from '@domino/contracts';
 import type { SessionStore } from './sessions/token.js';
+import type { RoomRegistry } from './rooms/registry.js';
+import { attachHandlers } from './transport/handlers.js';
 
 export interface IoOptions {
   readonly httpServer: HttpServer;
   readonly sessions: SessionStore;
+  readonly registry: RoomRegistry;
   readonly logger: Logger;
 }
 
@@ -15,7 +18,7 @@ export interface SocketData {
 }
 
 export function createSocketServer(opts: IoOptions): SocketIOServer {
-  const { httpServer, sessions, logger } = opts;
+  const { httpServer, sessions, registry, logger } = opts;
   const io = new SocketIOServer(httpServer, {
     cors: { origin: '*' },
     transports: ['websocket', 'polling'],
@@ -46,10 +49,7 @@ export function createSocketServer(opts: IoOptions): SocketIOServer {
   io.on('connection', (socket) => {
     const data = socket.data as SocketData;
     logger.info({ id: socket.id, token: data.sessionToken.slice(0, 8) }, 'socket connected');
-
-    socket.on('disconnect', (reason) => {
-      logger.info({ id: socket.id, reason }, 'socket disconnected');
-    });
+    attachHandlers(socket, { io, registry, logger });
   });
 
   return io;

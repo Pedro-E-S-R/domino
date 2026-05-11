@@ -1,18 +1,21 @@
 import { getTile, type PipValue, type TileId } from '@domino/engine';
 
+export type TileLayout = 'horizontal' | 'vertical';
+
 export interface TileProps {
   tileId: TileId;
   orientation?: 'normal' | 'flipped';
+  layout?: TileLayout;
   size?: 'sm' | 'md' | 'lg';
   highlighted?: boolean;
   disabled?: boolean;
   onClick?: () => void;
 }
 
-const SIZE: Record<NonNullable<TileProps['size']>, { w: number; h: number }> = {
-  sm: { w: 32, h: 64 },
-  md: { w: 44, h: 88 },
-  lg: { w: 56, h: 112 },
+const DIM: Record<NonNullable<TileProps['size']>, { short: number; long: number }> = {
+  sm: { short: 32, long: 64 },
+  md: { short: 44, long: 88 },
+  lg: { short: 56, long: 112 },
 };
 
 function PipFace({ value, w, h }: { value: PipValue; w: number; h: number }): JSX.Element {
@@ -63,22 +66,35 @@ function PipFace({ value, w, h }: { value: PipValue; w: number; h: number }): JS
 export function Tile({
   tileId,
   orientation = 'normal',
+  layout = 'horizontal',
   size = 'md',
   highlighted = false,
   disabled = false,
   onClick,
 }: TileProps): JSX.Element {
-  const { w, h } = SIZE[size];
+  const dim = DIM[size];
+  const horizontal = layout === 'horizontal';
+  const w = horizontal ? dim.long : dim.short;
+  const h = horizontal ? dim.short : dim.long;
   const tile = getTile(tileId);
-  const topVal = orientation === 'normal' ? tile.a : tile.b;
-  const botVal = orientation === 'normal' ? tile.b : tile.a;
+  const firstVal = orientation === 'normal' ? tile.a : tile.b;
+  const secondVal = orientation === 'normal' ? tile.b : tile.a;
+  const halfLong = dim.long / 2 - 1;
+  const halfShort = dim.short;
+  const halfW = horizontal ? halfLong : halfShort;
+  const halfH = horizontal ? halfShort : halfLong;
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      data-tile-id={tileId}
+      data-layout={layout}
+      data-orientation={orientation}
       className={[
-        'relative rounded-lg domino-shadow border border-amber-gold/40 bg-ivory-tile flex flex-col items-center justify-between transition-all',
+        'relative rounded-lg domino-shadow border border-amber-gold/40 bg-ivory-tile transition-all items-center justify-between',
+        horizontal ? 'flex flex-row' : 'flex flex-col',
         highlighted ? 'ring-2 ring-amber-gold scale-105' : '',
         disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105',
       ]
@@ -87,12 +103,16 @@ export function Tile({
       style={{ width: w, height: h }}
       aria-label={`Peça ${tile.a}-${tile.b}`}
     >
-      <div className="flex-1 w-full flex items-center justify-center">
-        <PipFace value={topVal} w={w} h={h / 2 - 2} />
+      <div
+        className={`flex-1 ${horizontal ? 'h-full' : 'w-full'} flex items-center justify-center`}
+      >
+        <PipFace value={firstVal} w={halfW} h={halfH} />
       </div>
-      <div className="w-full h-px bg-amber-gold/40" />
-      <div className="flex-1 w-full flex items-center justify-center">
-        <PipFace value={botVal} w={w} h={h / 2 - 2} />
+      <div className={horizontal ? 'h-full w-px bg-amber-gold/40' : 'w-full h-px bg-amber-gold/40'} />
+      <div
+        className={`flex-1 ${horizontal ? 'h-full' : 'w-full'} flex items-center justify-center`}
+      >
+        <PipFace value={secondVal} w={halfW} h={halfH} />
       </div>
     </button>
   );

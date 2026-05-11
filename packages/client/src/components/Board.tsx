@@ -1,5 +1,6 @@
 import type { LaidTile, PipValue } from '@domino/contracts';
 import { Tile } from './Tile.js';
+import { boardLayoutFor } from './boardLayout.js';
 
 export interface BoardProps {
   board: readonly LaidTile[];
@@ -32,6 +33,7 @@ export function Board({ board, leftEnd, rightEnd }: BoardProps): JSX.Element {
             key={`${laid.tileId}-${i}`}
             tileId={laid.tileId}
             orientation={laid.orientation}
+            layout={boardLayoutFor(laid.tileId)}
             size="sm"
             disabled
           />

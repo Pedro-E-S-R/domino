@@ -15,6 +15,8 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:server": "npm run build --prefix packages/engine && npm run build --prefix packages/contracts && npm run build --prefix packages/server",
+    "start:server": "node packages/server/dist/index.js",
     "test": "npm run test --workspaces --if-present",
     "dev:server": "npm run dev -w @domino/server",
     "dev:client": "npm run dev -w @domino/client",

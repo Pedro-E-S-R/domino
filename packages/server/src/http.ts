@@ -15,11 +15,15 @@ export interface HttpAppOptions {
 export function createHttpApp(opts: HttpAppOptions): Express {
   const { config, sessions, registry, logger } = opts;
   const app = express();
+  const corsOrigin =
+    process.env['CORS_ORIGIN'] && process.env['CORS_ORIGIN']!.length > 0
+      ? process.env['CORS_ORIGIN']!
+      : '*';
 
   app.use(express.json({ limit: '64kb' }));
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', corsOrigin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') {
@@ -29,7 +33,7 @@ export function createHttpApp(opts: HttpAppOptions): Express {
     next();
   });
 
-  app.get('/health', (_req, res) => {
+  const healthHandler = (_req: Request, res: Response): void => {
     res.json({
       ok: true,
       protocolVersion: PROTOCOL_VERSION,
@@ -37,7 +41,9 @@ export function createHttpApp(opts: HttpAppOptions): Express {
       mode: config.mode,
       roomsEndpoint: isRoomsEndpointEnabled(config),
     });
-  });
+  };
+  app.get('/health', healthHandler);
+  app.get('/healthz', healthHandler);
 
   app.post('/session', (_req, res) => {
     const record = sessions.issue();

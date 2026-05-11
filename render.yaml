@@ -5,11 +5,13 @@ services:
     plan: free
     buildCommand: |
       npm install --include=dev
-      npm run -w @domino/engine build
-      npm run -w @domino/contracts build
-      npm run -w @domino/server build
-    startCommand: node packages/server/dist/index.js --port=$PORT --host=0.0.0.0
-    healthCheckPath: /health
+      npm run build --prefix packages/engine
+      npm run build --prefix packages/contracts
+      npm run build --prefix packages/server
+    startCommand: node packages/server/dist/index.js
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
+      - key: CORS_ORIGIN
+        value: "*"

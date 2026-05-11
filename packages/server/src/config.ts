@@ -9,8 +9,8 @@ export interface ServerConfig {
 
 export function parseConfig(argv: readonly string[]): ServerConfig {
   let mode: ServerMode = 'online';
-  let port = 4123;
-  let host = '0.0.0.0';
+  let port = readEnvPort() ?? 4123;
+  let host = process.env['HOST'] && process.env['HOST']!.length > 0 ? process.env['HOST']! : '0.0.0.0';
   let debug = false;
 
   for (const arg of argv) {
@@ -37,4 +37,12 @@ export function parseConfig(argv: readonly string[]): ServerConfig {
 
 export function isRoomsEndpointEnabled(config: ServerConfig): boolean {
   return config.mode === 'lan' || config.debug;
+}
+
+function readEnvPort(): number | null {
+  const raw = process.env['PORT'];
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) return null;
+  return parsed;
 }

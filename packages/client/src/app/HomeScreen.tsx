@@ -5,9 +5,18 @@ export interface HomeScreenProps {
   onJoin: () => void;
   onOffline: () => void;
   onRules: () => void;
+  onServerConfig: () => void;
+  serverLabel: string;
 }
 
-export function HomeScreen({ onCreate, onJoin, onOffline, onRules }: HomeScreenProps): JSX.Element {
+export function HomeScreen({
+  onCreate,
+  onJoin,
+  onOffline,
+  onRules,
+  onServerConfig,
+  serverLabel,
+}: HomeScreenProps): JSX.Element {
   return (
     <main className="relative z-10 flex flex-col items-center justify-center px-margin-mobile pt-10 pb-24 min-h-screen">
       <div className="mb-12 flex flex-col items-center">
@@ -42,6 +51,15 @@ export function HomeScreen({ onCreate, onJoin, onOffline, onRules }: HomeScreenP
       >
         <span className="material-symbols-outlined">menu_book</span>
         Como jogar
+      </button>
+
+      <button
+        onClick={onServerConfig}
+        className="mt-3 text-rich-wood/70 text-label-sm hover:text-rich-wood transition-all flex items-center gap-1 font-mono"
+        aria-label="Configurar servidor"
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>dns</span>
+        {serverLabel}
       </button>
     </main>
   );

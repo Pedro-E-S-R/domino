@@ -119,6 +119,13 @@ export function useOnlineSession(serverUrl: string): {
         setSocket(s);
         s.on('connect', () => dispatch({ type: 'CONNECTED' }));
         s.on('disconnect', () => dispatch({ type: 'DISCONNECTED' }));
+        s.on('connect_error', (err: Error) => {
+          const msg = err?.message ?? 'erro desconhecido';
+          dispatch({
+            type: 'ERROR_TOAST',
+            message: `Não conseguiu conectar em ${serverUrl}: ${msg}. Verifique o endereço do servidor.`,
+          });
+        });
         s.on('room:state', (evt: RoomStateEvent) =>
           dispatch({ type: 'ROOM_STATE', view: evt.view, me: evt.me }),
         );

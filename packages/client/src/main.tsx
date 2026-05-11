@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useCallback, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { PlayerCount, PublicMatchView } from '@domino/contracts';
 import { CreateMatchScreen } from './app/CreateMatchScreen.js';
@@ -9,16 +9,16 @@ import { JoinMatchScreen } from './app/JoinMatchScreen.js';
 import { LobbyScreen } from './app/LobbyScreen.js';
 import { OfflineSetupScreen } from './app/OfflineSetupScreen.js';
 import { RulesScreen } from './app/RulesScreen.js';
+import { ServerConfigScreen } from './app/ServerConfigScreen.js';
 import { useOnlineSession } from './net/online-store.js';
 import { useOfflineGame } from './offline/useOfflineGame.js';
+import { resolveServerUrl } from './net/server-url.js';
 import './styles/index.css';
-
-const SERVER_URL =
-  (import.meta.env['VITE_SERVER_URL'] as string | undefined) ?? 'http://localhost:4123';
 
 type AppMode =
   | { kind: 'home' }
   | { kind: 'rules' }
+  | { kind: 'server-config' }
   | { kind: 'online' }
   | { kind: 'offline-setup' }
   | { kind: 'offline-game'; playerCount: PlayerCount; nonce: number };
@@ -47,8 +47,14 @@ function amReadyIn(view: PublicMatchView): boolean {
   return view.players[0]?.ready === true;
 }
 
-function OnlineApp({ onLeaveOnline }: { onLeaveOnline(): void }): JSX.Element {
-  const { state, actions } = useOnlineSession(SERVER_URL);
+function OnlineApp({
+  serverUrl,
+  onLeaveOnline,
+}: {
+  serverUrl: string;
+  onLeaveOnline(): void;
+}): JSX.Element {
+  const { state, actions } = useOnlineSession(serverUrl);
 
   let body: JSX.Element;
   switch (state.screen) {
@@ -187,36 +193,46 @@ function OfflineApp({
 
 function App(): JSX.Element {
   const [mode, setMode] = useState<AppMode>({ kind: 'home' });
-  const [onlineEntry, setOnlineEntry] = useState<'create' | 'join'>('create');
-  void onlineEntry;
+  const [serverUrl, setServerUrl] = useState<string>(() => resolveServerUrl());
+
+  const goHome = useCallback(() => setMode({ kind: 'home' }), []);
+  const homeProps = {
+    onCreate: () => setMode({ kind: 'online' }),
+    onJoin: () => setMode({ kind: 'online' }),
+    onOffline: () => setMode({ kind: 'offline-setup' }),
+    onRules: () => setMode({ kind: 'rules' }),
+    onServerConfig: () => setMode({ kind: 'server-config' }),
+    serverLabel: serverUrl,
+  };
 
   switch (mode.kind) {
     case 'home':
+      return <HomeScreen {...homeProps} />;
+    case 'rules':
+      return <RulesScreen onHome={goHome} />;
+    case 'server-config':
       return (
-        <HomeScreen
-          onCreate={() => {
-            setOnlineEntry('create');
-            setMode({ kind: 'online' });
+        <ServerConfigScreen
+          currentUrl={serverUrl}
+          onSave={(url) => {
+            setServerUrl(url);
+            goHome();
           }}
-          onJoin={() => {
-            setOnlineEntry('join');
-            setMode({ kind: 'online' });
+          onReset={() => {
+            setServerUrl(resolveServerUrl());
           }}
-          onOffline={() => setMode({ kind: 'offline-setup' })}
-          onRules={() => setMode({ kind: 'rules' })}
+          onBack={goHome}
         />
       );
-    case 'rules':
-      return <RulesScreen onHome={() => setMode({ kind: 'home' })} />;
     case 'online':
-      return <OnlineApp onLeaveOnline={() => setMode({ kind: 'home' })} />;
+      return <OnlineApp key={serverUrl} serverUrl={serverUrl} onLeaveOnline={goHome} />;
     case 'offline-setup':
       return (
         <OfflineSetupScreen
           onStart={(playerCount) =>
             setMode({ kind: 'offline-game', playerCount, nonce: Date.now() })
           }
-          onBack={() => setMode({ kind: 'home' })}
+          onBack={goHome}
         />
       );
     case 'offline-game':
@@ -227,7 +243,7 @@ function App(): JSX.Element {
           onRestart={() =>
             setMode({ kind: 'offline-game', playerCount: mode.playerCount, nonce: Date.now() })
           }
-          onHome={() => setMode({ kind: 'home' })}
+          onHome={goHome}
         />
       );
   }

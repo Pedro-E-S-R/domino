@@ -7,7 +7,9 @@ export function broadcastRoomState(io: SocketIOServer, match: Match): void {
   const view = buildPublicView(match);
   for (const seat of match.seats) {
     if (!seat || !seat.socketId) continue;
-    const me = match.game ? buildPrivateView(match.game, seat.seat) : null;
+    const me = match.game
+      ? buildPrivateView(match.game, seat.seat)
+      : { mySeat: seat.seat, myHand: [], legalMoves: [] };
     const payload: RoomStateEvent = { view, me };
     io.to(seat.socketId).emit('room:state', payload);
   }

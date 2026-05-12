@@ -1,6 +1,6 @@
 import { StrictMode, useCallback, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { PlayerCount, PublicMatchView } from '@domino/contracts';
+import type { PlayerCount, PrivatePlayerView, PublicMatchView } from '@domino/contracts';
 import { CreateMatchScreen } from './app/CreateMatchScreen.js';
 import { EndScreen } from './app/EndScreen.js';
 import { GameScreen, type GameIntent } from './app/GameScreen.js';
@@ -40,12 +40,13 @@ function ErrorToast({ message, onDismiss }: { message: string; onDismiss(): void
   );
 }
 
-function amHostOf(view: PublicMatchView): boolean {
-  return view.players[0]?.seat === 0;
+function amHostOf(me: PrivatePlayerView | null): boolean {
+  return me?.mySeat === 0;
 }
 
-function amReadyIn(view: PublicMatchView): boolean {
-  return view.players[0]?.ready === true;
+function amReadyFor(view: PublicMatchView, me: PrivatePlayerView | null): boolean {
+  if (!me) return false;
+  return view.players.find((p) => p.seat === me.mySeat)?.ready === true;
 }
 
 function OnlineApp({
@@ -101,8 +102,8 @@ function OnlineApp({
           <LobbyScreen
             view={state.view}
             mySessionToken={null}
-            amHost={amHostOf(state.view)}
-            amReady={amReadyIn(state.view)}
+            amHost={amHostOf(state.me)}
+            amReady={amReadyFor(state.view, state.me)}
             onToggleReady={actions.toggleReady}
             onStart={actions.startMatch}
             onLeave={() => {

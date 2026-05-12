@@ -1,8 +1,9 @@
 const STORAGE_KEY = 'domino.serverUrl';
+const HARDCODED_DEFAULT = 'https://domino-60x4.onrender.com';
 
 export function getDefaultServerUrl(): string {
   const env = (import.meta as { env?: Record<string, string | undefined> }).env;
-  return env?.['VITE_SERVER_URL'] ?? 'http://localhost:4123';
+  return env?.['VITE_SERVER_URL'] ?? HARDCODED_DEFAULT;
 }
 
 export function readStoredServerUrl(): string | null {

@@ -137,7 +137,14 @@ function OnlineApp({
           else if (intent.type === 'DRAW') actions.drawTile();
           else actions.passTurn();
         };
-        body = <GameScreen view={state.view} me={state.me} onIntent={onIntent} />;
+        body = (
+          <GameScreen
+            view={state.view}
+            me={state.me}
+            lastLaidTileId={state.lastLaidTileId}
+            onIntent={onIntent}
+          />
+        );
       }
       break;
     }
@@ -167,6 +174,7 @@ function OnlineApp({
             board={state.view.board}
             leftEnd={state.view.leftEnd}
             rightEnd={state.view.rightEnd}
+            recentTileId={state.lastLaidTileId}
             canRematch={canRematch}
             {...(hint !== undefined ? { rematchHint: hint } : {})}
             onRematch={actions.rematchMatch}
@@ -211,6 +219,7 @@ function OfflineApp({
         board={snapshot.view.board}
         leftEnd={snapshot.view.leftEnd}
         rightEnd={snapshot.view.rightEnd}
+        recentTileId={snapshot.lastLaidTileId}
         canRematch
         onRematch={onRestart}
         onHome={onHome}
@@ -223,7 +232,14 @@ function OfflineApp({
     else if (intent.type === 'DRAW') drawTile();
     else passTurn();
   };
-  return <GameScreen view={snapshot.view} me={snapshot.me} onIntent={onIntent} />;
+  return (
+    <GameScreen
+      view={snapshot.view}
+      me={snapshot.me}
+      lastLaidTileId={snapshot.lastLaidTileId}
+      onIntent={onIntent}
+    />
+  );
 }
 
 function App(): JSX.Element {

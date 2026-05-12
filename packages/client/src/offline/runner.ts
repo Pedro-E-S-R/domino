@@ -25,6 +25,7 @@ export interface OfflineSnapshot {
   me: PrivatePlayerView;
   result: MatchResult | null;
   isHumanTurn: boolean;
+  lastLaidTileId: TileId | null;
 }
 
 export interface OfflineRunner {
@@ -40,11 +41,13 @@ export interface OfflineRunner {
 export function createOfflineRunner(opts: { seed: number; playerCount: 2 | 4 }): OfflineRunner {
   let state: GameState = createInitialState(opts.seed, opts.playerCount);
   const startTime = Date.now();
+  let lastLaidTileId: TileId | null = null;
 
   const applyAction = (action: GameAction): boolean => {
     const result = reduce(state, action);
     if (!result.ok) return false;
     state = result.state;
+    if (action.type === 'LAY') lastLaidTileId = action.tileId;
     return true;
   };
 
@@ -53,7 +56,13 @@ export function createOfflineRunner(opts: { seed: number; playerCount: 2 | 4 }):
       const view = buildOfflinePublicView(state, startTime);
       const me = buildOfflinePrivateView(state, HUMAN_SEAT);
       const isHumanTurn = state.phase !== 'ended' && state.turn === HUMAN_SEAT;
-      return { view, me, result: toWireResult(state.result), isHumanTurn };
+      return {
+        view,
+        me,
+        result: toWireResult(state.result),
+        isHumanTurn,
+        lastLaidTileId,
+      };
     },
     applyHumanLay(tileId, end) {
       if (state.turn !== HUMAN_SEAT) return false;

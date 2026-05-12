@@ -2,6 +2,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type {
   End,
   ErrorPayload,
+  LastAction,
   MatchEndedEvent,
   MatchResult,
   MatchStateEvent,
@@ -21,6 +22,7 @@ export interface OnlineState {
   view: PublicMatchView | null;
   me: PrivatePlayerView | null;
   result: MatchResult | null;
+  lastLaidTileId: TileId | null;
   errorToast: string | null;
 }
 
@@ -29,7 +31,12 @@ type Action =
   | { type: 'CONNECTED' }
   | { type: 'DISCONNECTED' }
   | { type: 'ROOM_STATE'; view: PublicMatchView; me: PrivatePlayerView | null }
-  | { type: 'MATCH_STATE'; view: PublicMatchView; me: PrivatePlayerView }
+  | {
+      type: 'MATCH_STATE';
+      view: PublicMatchView;
+      me: PrivatePlayerView;
+      lastAction: LastAction | null;
+    }
   | { type: 'MATCH_ENDED'; result: MatchResult; view: PublicMatchView }
   | { type: 'ERROR_TOAST'; message: string }
   | { type: 'CLEAR_ERROR' }
@@ -41,6 +48,7 @@ const initialState: OnlineState = {
   view: null,
   me: null,
   result: null,
+  lastLaidTileId: null,
   errorToast: null,
 };
 
@@ -59,7 +67,18 @@ function reducer(state: OnlineState, action: Action): OnlineState {
       return next;
     }
     case 'MATCH_STATE': {
-      const next: OnlineState = { ...state, view: action.view, me: action.me };
+      const lastLaidTileId =
+        action.lastAction &&
+        action.lastAction.kind === 'LAY' &&
+        action.lastAction.tileId !== undefined
+          ? action.lastAction.tileId
+          : state.lastLaidTileId;
+      const next: OnlineState = {
+        ...state,
+        view: action.view,
+        me: action.me,
+        lastLaidTileId,
+      };
       if (action.view.status === 'playing' && state.screen !== 'game') next.screen = 'game';
       return next;
     }
@@ -70,7 +89,7 @@ function reducer(state: OnlineState, action: Action): OnlineState {
     case 'CLEAR_ERROR':
       return { ...state, errorToast: null };
     case 'CLEAR_MATCH':
-      return { ...state, view: null, me: null, result: null };
+      return { ...state, view: null, me: null, result: null, lastLaidTileId: null };
   }
 }
 
@@ -154,7 +173,12 @@ export function useOnlineSession(
           dispatch({ type: 'ROOM_STATE', view: evt.view, me: evt.me }),
         );
         s.on('match:state', (evt: MatchStateEvent) =>
-          dispatch({ type: 'MATCH_STATE', view: evt.view, me: evt.me }),
+          dispatch({
+            type: 'MATCH_STATE',
+            view: evt.view,
+            me: evt.me,
+            lastAction: evt.lastAction,
+          }),
         );
         s.on('match:ended', (evt: MatchEndedEvent) =>
           dispatch({ type: 'MATCH_ENDED', result: evt.result, view: evt.view }),

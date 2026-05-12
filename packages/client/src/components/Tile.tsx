@@ -8,6 +8,7 @@ export interface TileProps {
   layout?: TileLayout;
   size?: 'sm' | 'md' | 'lg';
   highlighted?: boolean;
+  recent?: boolean;
   disabled?: boolean;
   onClick?: () => void;
 }
@@ -69,6 +70,7 @@ export function Tile({
   layout = 'horizontal',
   size = 'md',
   highlighted = false,
+  recent = false,
   disabled = false,
   onClick,
 }: TileProps): JSX.Element {
@@ -92,13 +94,18 @@ export function Tile({
       data-tile-id={tileId}
       data-layout={layout}
       data-orientation={orientation}
+      data-recent={recent ? 'true' : undefined}
       className={[
-        'relative rounded-lg border border-amber-gold/40 bg-ivory-tile transition-all items-center justify-between',
+        'relative rounded-lg border bg-ivory-tile transition-all items-center justify-between',
         horizontal ? 'flex flex-row' : 'flex flex-col',
         highlighted
-          ? 'ring-4 ring-amber-gold scale-110 tile-playable-glow z-10'
-          : 'domino-shadow',
-        disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:scale-105',
+          ? 'ring-4 ring-amber-gold scale-110 tile-playable-glow z-10 border-amber-gold/40'
+          : recent
+            ? 'ring-2 ring-amber-gold scale-105 shadow-[0_0_14px_rgba(212,165,116,0.85)] z-10 border-amber-gold'
+            : 'domino-shadow border-amber-gold/40',
+        disabled && !recent ? 'opacity-40 cursor-not-allowed' : '',
+        !disabled || recent ? '' : 'cursor-not-allowed',
+        !disabled ? 'cursor-pointer hover:scale-105' : '',
       ]
         .filter(Boolean)
         .join(' ')}

@@ -1,4 +1,4 @@
-import type { LaidTile, MatchResult, PipValue, PlayerSummary } from '@domino/contracts';
+import type { LaidTile, MatchResult, PipValue, PlayerSummary, TileId } from '@domino/contracts';
 import { Avatar } from '../components/Avatar.js';
 import { Board } from '../components/Board.js';
 import { BotecoButton } from '../components/BotecoButton.js';
@@ -9,6 +9,7 @@ export interface EndScreenProps {
   board?: readonly LaidTile[];
   leftEnd?: PipValue | null;
   rightEnd?: PipValue | null;
+  recentTileId?: TileId | null;
   canRematch: boolean;
   rematchHint?: string;
   onRematch: () => void;
@@ -34,6 +35,7 @@ export function EndScreen({
   board,
   leftEnd = null,
   rightEnd = null,
+  recentTileId = null,
   canRematch,
   rematchHint,
   onRematch,
@@ -45,7 +47,12 @@ export function EndScreen({
       {showBoard && (
         <section className="w-full max-w-md mb-gutter">
           <div className="bg-primary rounded-xl border-4 border-tertiary-container table-inner-shadow py-2">
-            <Board board={board as readonly LaidTile[]} leftEnd={leftEnd} rightEnd={rightEnd} />
+            <Board
+              board={board as readonly LaidTile[]}
+              leftEnd={leftEnd}
+              rightEnd={rightEnd}
+              recentTileId={recentTileId}
+            />
           </div>
           <div className="text-center text-rich-wood/70 text-label-sm mt-1">Tabuleiro final</div>
         </section>

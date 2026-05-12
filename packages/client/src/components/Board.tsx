@@ -1,4 +1,4 @@
-import type { LaidTile, PipValue } from '@domino/contracts';
+import type { LaidTile, PipValue, TileId } from '@domino/contracts';
 import { Tile } from './Tile.js';
 import { boardLayoutFor } from './boardLayout.js';
 
@@ -6,9 +6,15 @@ export interface BoardProps {
   board: readonly LaidTile[];
   leftEnd: PipValue | null;
   rightEnd: PipValue | null;
+  recentTileId?: TileId | null;
 }
 
-export function Board({ board, leftEnd, rightEnd }: BoardProps): JSX.Element {
+export function Board({
+  board,
+  leftEnd,
+  rightEnd,
+  recentTileId = null,
+}: BoardProps): JSX.Element {
   if (board.length === 0) {
     return (
       <div className="w-full min-h-[140px] flex items-center justify-center text-soft-cream/70 font-body-md italic">
@@ -36,6 +42,7 @@ export function Board({ board, leftEnd, rightEnd }: BoardProps): JSX.Element {
             layout={boardLayoutFor(laid.tileId)}
             size="sm"
             disabled
+            recent={laid.tileId === recentTileId}
           />
         ))}
         {rightEnd !== null && (

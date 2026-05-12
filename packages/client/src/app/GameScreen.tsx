@@ -13,10 +13,16 @@ export type GameIntent =
 export interface GameScreenProps {
   view: PublicMatchView;
   me: PrivatePlayerView;
+  lastLaidTileId?: TileId | null;
   onIntent: (intent: GameIntent) => void;
 }
 
-export function GameScreen({ view, me, onIntent }: GameScreenProps): JSX.Element {
+export function GameScreen({
+  view,
+  me,
+  lastLaidTileId = null,
+  onIntent,
+}: GameScreenProps): JSX.Element {
   const isMyTurn = view.currentSeat !== null && view.currentSeat === me.mySeat;
   const canDraw =
     isMyTurn && me.legalMoves.length === 0 && view.boneyardCount > 0;
@@ -72,7 +78,12 @@ export function GameScreen({ view, me, onIntent }: GameScreenProps): JSX.Element
           isMyTurn ? 'my-turn-glow ring-2 ring-amber-gold/60' : 'table-inner-shadow',
         ].join(' ')}
       >
-        <Board board={view.board} leftEnd={view.leftEnd} rightEnd={view.rightEnd} />
+        <Board
+          board={view.board}
+          leftEnd={view.leftEnd}
+          rightEnd={view.rightEnd}
+          recentTileId={lastLaidTileId}
+        />
         <div className="text-center text-soft-cream/70 font-label-sm">
           Monte: {view.boneyardCount}
         </div>

@@ -78,6 +78,8 @@ export function GameScreen({ view, me, onIntent }: GameScreenProps): JSX.Element
           hand={me.myHand}
           legalMoves={me.legalMoves}
           disabled={!isMyTurn}
+          leftEnd={view.leftEnd}
+          rightEnd={view.rightEnd}
           onPlay={(tileId, end) => onIntent({ type: 'LAY', tileId, end })}
         />
         <div className="flex gap-gutter px-margin-mobile">

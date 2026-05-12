@@ -32,4 +32,38 @@
     transform: scale(0.97);
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
   }
+  .tile-playable-glow {
+    animation: tile-playable-pulse 1.6s ease-in-out infinite;
+  }
+  .my-turn-glow {
+    animation: my-turn-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes tile-playable-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 4px 10px rgba(0, 0, 0, 0.3),
+      0 0 14px rgba(212, 165, 116, 0.5);
+  }
+  50% {
+    box-shadow:
+      0 6px 14px rgba(0, 0, 0, 0.35),
+      0 0 24px rgba(212, 165, 116, 0.85);
+  }
+}
+
+@keyframes my-turn-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 4px 12px rgba(0, 0, 0, 0.25),
+      0 0 18px rgba(212, 165, 116, 0.35);
+  }
+  50% {
+    box-shadow:
+      inset 0 4px 12px rgba(0, 0, 0, 0.25),
+      0 0 36px rgba(212, 165, 116, 0.7);
+  }
 }

@@ -3,14 +3,18 @@ import { ModeSchema, MoveIdSchema, PlayerCountSchema, RoomCodeSchema } from './r
 import { EndSchema, MatchResultSchema, PrivatePlayerViewSchema, PublicMatchViewSchema, SeatSchema, TileIdSchema } from './views.js';
 import { ErrorPayloadSchema } from './errors.js';
 
+export const DisplayNameSchema = z.string().trim().min(1).max(30);
+
 export const RoomCreatePayloadSchema = z.object({
   mode: ModeSchema,
   playerCount: PlayerCountSchema,
+  displayName: DisplayNameSchema.optional(),
 });
 export type RoomCreatePayload = z.infer<typeof RoomCreatePayloadSchema>;
 
 export const RoomJoinPayloadSchema = z.object({
   roomCode: RoomCodeSchema,
+  displayName: DisplayNameSchema.optional(),
 });
 export type RoomJoinPayload = z.infer<typeof RoomJoinPayloadSchema>;
 

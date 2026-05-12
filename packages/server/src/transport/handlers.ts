@@ -86,6 +86,7 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
       playerCount: parsed.data.playerCount,
       hostSessionToken: token,
       hostSocketId: socket.id,
+      ...(parsed.data.displayName ? { hostDisplayName: parsed.data.displayName } : {}),
     });
     logger.info({ roomCode: match.roomCode, mode: match.mode, pc: match.playerCount }, 'room created');
     broadcastRoomState(io, match);
@@ -101,6 +102,7 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
       roomCode: parsed.data.roomCode,
       sessionToken: token,
       socketId: socket.id,
+      ...(parsed.data.displayName ? { displayName: parsed.data.displayName } : {}),
     });
     if ('error' in result) {
       const msg =

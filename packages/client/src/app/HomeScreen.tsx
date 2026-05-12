@@ -6,7 +6,9 @@ export interface HomeScreenProps {
   onOffline: () => void;
   onRules: () => void;
   onServerConfig: () => void;
+  onEditName: () => void;
   serverLabel: string;
+  playerName: string | null;
 }
 
 export function HomeScreen({
@@ -15,7 +17,9 @@ export function HomeScreen({
   onOffline,
   onRules,
   onServerConfig,
+  onEditName,
   serverLabel,
+  playerName,
 }: HomeScreenProps): JSX.Element {
   return (
     <main className="relative z-10 flex flex-col items-center justify-center px-margin-mobile pt-10 pb-24 min-h-screen">
@@ -46,8 +50,17 @@ export function HomeScreen({
       </div>
 
       <button
+        onClick={onEditName}
+        className="mt-6 text-rich-wood font-label-lg hover:underline transition-all flex items-center gap-2"
+        aria-label="Editar nome do jogador"
+      >
+        <span className="material-symbols-outlined">person</span>
+        {playerName ?? 'Definir seu nome'}
+      </button>
+
+      <button
         onClick={onRules}
-        className="mt-8 text-secondary font-label-lg hover:underline transition-all flex items-center gap-2"
+        className="mt-3 text-secondary font-label-lg hover:underline transition-all flex items-center gap-2"
       >
         <span className="material-symbols-outlined">menu_book</span>
         Como jogar

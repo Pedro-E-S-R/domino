@@ -66,7 +66,12 @@ export function GameScreen({ view, me, onIntent }: GameScreenProps): JSX.Element
         />
       </div>
 
-      <section className="flex-1 mx-margin-mobile my-gutter bg-primary-container rounded-xl table-inner-shadow flex flex-col justify-center">
+      <section
+        className={[
+          'flex-1 mx-margin-mobile my-gutter bg-primary-container rounded-xl flex flex-col justify-center transition-all',
+          isMyTurn ? 'my-turn-glow ring-2 ring-amber-gold/60' : 'table-inner-shadow',
+        ].join(' ')}
+      >
         <Board board={view.board} leftEnd={view.leftEnd} rightEnd={view.rightEnd} />
         <div className="text-center text-soft-cream/70 font-label-sm">
           Monte: {view.boneyardCount}

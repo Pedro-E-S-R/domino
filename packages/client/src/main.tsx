@@ -10,16 +10,19 @@ import { LobbyScreen } from './app/LobbyScreen.js';
 import { OfflineSetupScreen } from './app/OfflineSetupScreen.js';
 import { RulesScreen } from './app/RulesScreen.js';
 import { ServerConfigScreen } from './app/ServerConfigScreen.js';
+import { NameScreen } from './app/NameScreen.js';
 import { useOnlineSession } from './net/online-store.js';
 import { useOfflineGame } from './offline/useOfflineGame.js';
 import { resolveServerUrl } from './net/server-url.js';
 import { clearStoredSession } from './net/session.js';
+import { resolvePlayerName } from './net/player-name.js';
 import './styles/index.css';
 
 type AppMode =
   | { kind: 'home' }
   | { kind: 'rules' }
   | { kind: 'server-config' }
+  | { kind: 'name-config' }
   | { kind: 'online' }
   | { kind: 'offline-setup' }
   | { kind: 'offline-game'; playerCount: PlayerCount; nonce: number };
@@ -52,10 +55,12 @@ function amReadyFor(view: PublicMatchView, me: PrivatePlayerView | null): boolea
 function OnlineApp({
   serverUrl,
   entryScreen,
+  playerName,
   onLeaveOnline,
 }: {
   serverUrl: string;
   entryScreen: 'create' | 'join';
+  playerName: string | null;
   onLeaveOnline(): void;
 }): JSX.Element {
   const { state, actions } = useOnlineSession(serverUrl, { initialScreen: entryScreen });
@@ -77,7 +82,12 @@ function OnlineApp({
     case 'create':
       body = (
         <CreateMatchScreen
-          onCreate={(opts) => actions.createMatch(opts)}
+          onCreate={(opts) =>
+            actions.createMatch({
+              ...opts,
+              ...(playerName ? { displayName: playerName } : {}),
+            })
+          }
           onBack={onLeaveOnline}
         />
       );
@@ -85,7 +95,7 @@ function OnlineApp({
     case 'join':
       body = (
         <JoinMatchScreen
-          onJoin={(code) => actions.joinMatch(code)}
+          onJoin={(code) => actions.joinMatch(code, playerName ?? undefined)}
           onBack={onLeaveOnline}
         />
       );
@@ -220,6 +230,7 @@ function App(): JSX.Element {
   const [mode, setMode] = useState<AppMode>({ kind: 'home' });
   const [serverUrl, setServerUrl] = useState<string>(() => resolveServerUrl());
   const [entryScreen, setEntryScreen] = useState<'create' | 'join'>('create');
+  const [playerName, setPlayerName] = useState<string | null>(() => resolvePlayerName());
 
   const goHome = useCallback(() => setMode({ kind: 'home' }), []);
   const enterOnline = (which: 'create' | 'join'): void => {
@@ -232,7 +243,9 @@ function App(): JSX.Element {
     onOffline: () => setMode({ kind: 'offline-setup' }),
     onRules: () => setMode({ kind: 'rules' }),
     onServerConfig: () => setMode({ kind: 'server-config' }),
+    onEditName: () => setMode({ kind: 'name-config' }),
     serverLabel: serverUrl,
+    playerName,
   };
 
   switch (mode.kind) {
@@ -240,6 +253,17 @@ function App(): JSX.Element {
       return <HomeScreen {...homeProps} />;
     case 'rules':
       return <RulesScreen onHome={goHome} />;
+    case 'name-config':
+      return (
+        <NameScreen
+          currentName={playerName}
+          onSave={(name) => {
+            setPlayerName(name);
+            goHome();
+          }}
+          onBack={goHome}
+        />
+      );
     case 'server-config':
       return (
         <ServerConfigScreen
@@ -262,6 +286,7 @@ function App(): JSX.Element {
           key={`${serverUrl}::${entryScreen}`}
           serverUrl={serverUrl}
           entryScreen={entryScreen}
+          playerName={playerName}
           onLeaveOnline={goHome}
         />
       );

@@ -76,8 +76,8 @@ function reducer(state: OnlineState, action: Action): OnlineState {
 
 export interface OnlineActions {
   nav(screen: Screen): void;
-  createMatch(opts: { mode: 'online' | 'lan'; playerCount: 2 | 4 }): void;
-  joinMatch(roomCode: string): void;
+  createMatch(opts: { mode: 'online' | 'lan'; playerCount: 2 | 4; displayName?: string }): void;
+  joinMatch(roomCode: string, displayName?: string): void;
   toggleReady(ready: boolean): void;
   startMatch(): void;
   rematchMatch(): void;
@@ -191,11 +191,22 @@ export function useOnlineSession(
   const actions: OnlineActions = {
     nav: (screen) => dispatch({ type: 'NAV', screen }),
     createMatch: (opts) => {
-      emit('room:create', opts);
+      const payload: Record<string, unknown> = {
+        mode: opts.mode,
+        playerCount: opts.playerCount,
+      };
+      if (opts.displayName && opts.displayName.trim().length > 0) {
+        payload['displayName'] = opts.displayName.trim();
+      }
+      emit('room:create', payload);
       dispatch({ type: 'NAV', screen: 'lobby' });
     },
-    joinMatch: (roomCode) => {
-      emit('room:join', { roomCode });
+    joinMatch: (roomCode, displayName) => {
+      const payload: Record<string, unknown> = { roomCode };
+      if (displayName && displayName.trim().length > 0) {
+        payload['displayName'] = displayName.trim();
+      }
+      emit('room:join', payload);
       dispatch({ type: 'NAV', screen: 'lobby' });
     },
     toggleReady: (ready) => emit('room:ready', { ready }),

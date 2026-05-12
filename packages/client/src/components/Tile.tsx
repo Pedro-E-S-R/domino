@@ -93,10 +93,12 @@ export function Tile({
       data-layout={layout}
       data-orientation={orientation}
       className={[
-        'relative rounded-lg domino-shadow border border-amber-gold/40 bg-ivory-tile transition-all items-center justify-between',
+        'relative rounded-lg border border-amber-gold/40 bg-ivory-tile transition-all items-center justify-between',
         horizontal ? 'flex flex-row' : 'flex flex-col',
-        highlighted ? 'ring-2 ring-amber-gold scale-105' : '',
-        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105',
+        highlighted
+          ? 'ring-4 ring-amber-gold scale-110 tile-playable-glow z-10'
+          : 'domino-shadow',
+        disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:scale-105',
       ]
         .filter(Boolean)
         .join(' ')}

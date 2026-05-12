@@ -89,6 +89,7 @@ export class RoomRegistry {
     roomCode: RoomCode;
     sessionToken: SessionToken;
     socketId: string;
+    displayName?: string;
   }): { match: Match; seat: Seat } | { error: 'ROOM_NOT_FOUND' | 'ROOM_FULL' | 'ROOM_IN_PROGRESS' } {
     const match = this.byCode.get(opts.roomCode);
     if (!match) return { error: 'ROOM_NOT_FOUND' };
@@ -98,6 +99,7 @@ export class RoomRegistry {
       if (seat?.sessionToken === opts.sessionToken) {
         seat.socketId = opts.socketId;
         seat.disconnectedAt = null;
+        if (opts.displayName) seat.displayName = opts.displayName;
         this.touch(match);
         return { match, seat: seat.seat };
       }
@@ -112,7 +114,7 @@ export class RoomRegistry {
     const record: SeatRecord = {
       seat: seatNumber,
       sessionToken: opts.sessionToken,
-      displayName: `Jogador ${freeIndex + 1}`,
+      displayName: opts.displayName ?? `Jogador ${freeIndex + 1}`,
       avatarId: AVATARS[freeIndex] as Avatar,
       socketId: opts.socketId,
       disconnectedAt: null,

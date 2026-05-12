@@ -25,6 +25,9 @@ export type RoomLeavePayload = z.infer<typeof RoomLeavePayloadSchema>;
 export const RoomStartPayloadSchema = z.object({}).strict();
 export type RoomStartPayload = z.infer<typeof RoomStartPayloadSchema>;
 
+export const RoomRematchPayloadSchema = z.object({}).strict();
+export type RoomRematchPayload = z.infer<typeof RoomRematchPayloadSchema>;
+
 export const MoveLayPayloadSchema = z.object({
   moveId: MoveIdSchema,
   tileId: TileIdSchema,
@@ -48,6 +51,7 @@ export const ClientToServerEvents = {
   'room:ready': RoomReadyPayloadSchema,
   'room:leave': RoomLeavePayloadSchema,
   'room:start': RoomStartPayloadSchema,
+  'room:rematch': RoomRematchPayloadSchema,
   'move:lay': MoveLayPayloadSchema,
   'move:draw': MoveDrawPayloadSchema,
   'move:pass': MovePassPayloadSchema,

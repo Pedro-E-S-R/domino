@@ -107,7 +107,7 @@ function OnlineApp({
             onStart={actions.startMatch}
             onLeave={() => {
               actions.leaveMatch();
-              onLeaveOnline();
+              setTimeout(onLeaveOnline, 200);
             }}
           />
         );
@@ -138,13 +138,31 @@ function OnlineApp({
           </main>
         );
       } else {
+        const amHost = state.me?.mySeat === 0;
+        const seatedCount = state.view.players.length;
+        const everyoneStillThere =
+          seatedCount === state.view.playerCount &&
+          state.view.players.every((p) => p.connected);
+        const canRematch = amHost && everyoneStillThere;
+        const hint = !amHost
+          ? 'Aguardando o anfitrião iniciar um rematch.'
+          : !everyoneStillThere
+            ? 'Aguardando todos os jogadores reconectarem.'
+            : undefined;
         body = (
           <EndScreen
             result={state.result}
             players={state.view.players}
-            canRematch={false}
-            onRematch={onLeaveOnline}
-            onHome={onLeaveOnline}
+            board={state.view.board}
+            leftEnd={state.view.leftEnd}
+            rightEnd={state.view.rightEnd}
+            canRematch={canRematch}
+            {...(hint !== undefined ? { rematchHint: hint } : {})}
+            onRematch={actions.rematchMatch}
+            onHome={() => {
+              actions.leaveMatch();
+              setTimeout(onLeaveOnline, 200);
+            }}
           />
         );
       }
@@ -179,6 +197,9 @@ function OfflineApp({
       <EndScreen
         result={snapshot.result}
         players={snapshot.view.players}
+        board={snapshot.view.board}
+        leftEnd={snapshot.view.leftEnd}
+        rightEnd={snapshot.view.rightEnd}
         canRematch
         onRematch={onRestart}
         onHome={onHome}

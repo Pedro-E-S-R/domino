@@ -9,6 +9,7 @@ import {
   RoomJoinPayloadSchema,
   RoomLeavePayloadSchema,
   RoomReadyPayloadSchema,
+  RoomRematchPayloadSchema,
   RoomStartPayloadSchema,
   type LastAction,
   type SessionToken,
@@ -47,7 +48,7 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
   const token: SessionToken = data.sessionToken;
 
   const existingMatch = registry.findByToken(token);
-  if (existingMatch) {
+  if (existingMatch && existingMatch.status === 'playing') {
     const seat = registry.seatOf(existingMatch, token);
     if (seat) {
       if (
@@ -65,10 +66,13 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
       seat.disconnectedAt = null;
       registry.touch(existingMatch);
       broadcastRoomState(io, existingMatch);
-      if (existingMatch.status === 'playing' && existingMatch.game) {
+      if (existingMatch.game) {
         broadcastMatchState(io, existingMatch, null);
       }
     }
+  } else if (existingMatch && existingMatch.status === 'lobby') {
+    registry.removeBySessionToken(token);
+    broadcastRoomState(io, existingMatch);
   }
 
   socket.on('room:create', (raw: unknown) => {
@@ -179,6 +183,52 @@ export function attachHandlers(socket: Socket, ctx: HandlerContext): void {
     registry.touch(match);
 
     logger.info({ roomCode: match.roomCode, seed, opener: game.opener }, 'match started');
+
+    for (const seat of match.seats) {
+      if (!seat || !seat.socketId) continue;
+      io.to(seat.socketId).emit('match:started', {
+        opener: game.opener as Seat,
+        turnDeadlineMs: match.turnDeadlineMs,
+      });
+    }
+    broadcastMatchState(io, match, null);
+    armTurnTimer(ctx, match);
+  });
+
+  socket.on('room:rematch', (raw: unknown) => {
+    const parsed = RoomRematchPayloadSchema.safeParse(raw);
+    if (!parsed.success) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Pedido de rematch inválido.');
+      return;
+    }
+    const match = registry.findByToken(token);
+    if (!match) {
+      sendError(io, socket.id, 'NOT_IN_MATCH', 'Você não está em uma partida.');
+      return;
+    }
+    if (match.hostSessionToken !== token) {
+      sendError(io, socket.id, 'NOT_HOST', 'Apenas o host pode jogar novamente.');
+      return;
+    }
+    if (match.status !== 'ended') {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Só é possível rematch após o fim de jogo.');
+      return;
+    }
+    const stillSeated = match.seats.filter((s) => s !== null).length;
+    if (stillSeated < match.playerCount) {
+      sendError(io, socket.id, 'INVALID_PAYLOAD', 'Aguardando jogadores reconectarem.');
+      return;
+    }
+
+    const seed = randomBytes(4).readUInt32LE(0);
+    const game = createInitialState(seed, match.playerCount);
+    match.game = game;
+    match.status = 'playing';
+    match.turnDeadlineMs = Date.now() + turnDurationMs(ctx);
+    match.processedMoveIds.clear();
+    registry.touch(match);
+
+    logger.info({ roomCode: match.roomCode, seed, opener: game.opener }, 'match rematch');
 
     for (const seat of match.seats) {
       if (!seat || !seat.socketId) continue;

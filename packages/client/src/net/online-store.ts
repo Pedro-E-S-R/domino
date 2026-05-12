@@ -80,6 +80,7 @@ export interface OnlineActions {
   joinMatch(roomCode: string): void;
   toggleReady(ready: boolean): void;
   startMatch(): void;
+  rematchMatch(): void;
   leaveMatch(): void;
   layTile(tileId: TileId, end: End): void;
   drawTile(): void;
@@ -199,6 +200,7 @@ export function useOnlineSession(
     },
     toggleReady: (ready) => emit('room:ready', { ready }),
     startMatch: () => emit('room:start', {}),
+    rematchMatch: () => emit('room:rematch', {}),
     leaveMatch: () => emit('room:leave', {}),
     layTile: (tileId, end) =>
       emit('move:lay', { moveId: uuid(), tileId, end }),

@@ -152,18 +152,96 @@ cause is a missing env var or a port-binding error if `PORT` wasn't
 injected (shouldn't happen, but if you migrate to a different platform
 that doesn't inject `PORT`, set `--port=<n>` in the start command).
 
-### Where the client lives
+## Client on Vercel (free tier)
 
-The client is a static Vite build. It can be hosted anywhere that serves
-static files:
+The repo ships a `vercel.json` at the root that handles the monorepo
+build. Vercel reads it and figures out the rest.
 
-- **Vercel / Netlify / Cloudflare Pages**: connect the same repo, set
-  build command `npm run build:client` and publish directory
-  `packages/client/dist/`.
-- **Android APK via Capacitor**: `npm run build:android` from the root
-  (requires Android SDK + JDK 17 locally).
+### One-time setup
 
-The client's runtime server URL is configurable at runtime — see
-`packages/client/src/net/server-url.ts`. Setting `VITE_SERVER_URL` at
-build time only changes the *default*; users can override it through the
-in-app Server config screen, which persists in `localStorage`.
+1. Push the branch to GitHub (already done if you followed the Render
+   section).
+
+2. Open <https://vercel.com/new>. Sign in with the GitHub account.
+
+3. **Import Git Repository** → pick `Pedro-E-S-R/domino`.
+
+4. On the configuration screen, Vercel reads `vercel.json` and pre-fills
+   build/output directories. The only thing **you** set:
+
+   - **Root Directory**: leave as `./` (repo root). Vercel needs to run
+     `npm install` at the root so the workspace symlinks resolve.
+   - **Environment Variables**: add `VITE_SERVER_URL` =
+     `https://domino-60x4.onrender.com` (or your Render URL). This bakes
+     the server hostname into the bundle so first-time visitors don't
+     need to configure anything.
+
+5. **Deploy**. First build takes 2–3 minutes. When it's done, Vercel
+   gives you a URL like `https://domino-xxxx.vercel.app`.
+
+6. Open the URL on any device — game playable immediately, no IP config
+   needed.
+
+### How the server URL works at runtime
+
+The client looks up the server URL in this order:
+
+1. `localStorage` value under `domino.serverUrl` (set via the in-app
+   Server config screen)
+2. `VITE_SERVER_URL` baked at build time (set on Vercel)
+3. Fallback: `http://localhost:4123`
+
+Users who want to switch servers without redeploying can tap the URL
+footer on the home screen and override it — handy for VPN/LAN testing
+without rebuilding.
+
+### `vercel.json` reference
+
+```json
+{
+  "installCommand": "npm install --include=dev",
+  "buildCommand": "npm run build --prefix packages/engine && npm run build --prefix packages/contracts && npm run build --prefix packages/client",
+  "outputDirectory": "packages/client/dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+- **`--include=dev`** for the same reason as Render: Vercel runs the
+  build in a context that may skip devDependencies; we force them.
+- **Build order**: engine → contracts → client. The client imports both,
+  and they must be compiled to their `dist/` before Vite tries to bundle
+  them.
+- **`outputDirectory`** points at where Vite emits the static site.
+- **`framework: null`** disables Vercel's auto-framework-detection.
+  The monorepo install pattern doesn't match Vite's default "single
+  project at root" assumption, and auto-detection sometimes overrides
+  our build command. Explicit `null` keeps Vercel out of the way.
+- **`rewrites`** sends every path to `index.html`. The client is a
+  single-page app — without this, refreshing on a screen that has a
+  pseudo-route would 404.
+
+### Updating the server URL later
+
+To point the deployed client at a different server (e.g., you move from
+Render free to a paid host), in Vercel: **Settings** → **Environment
+Variables** → edit `VITE_SERVER_URL` → trigger a redeploy.
+
+End users with stored overrides in `localStorage` keep their existing
+choice unless they tap "Limpar (voltar ao padrão)" in the Server config
+screen.
+
+### Android APK via Capacitor
+
+For the native Android build, the Vercel deploy is irrelevant — Capacitor
+bundles the web assets directly into the APK. From a developer machine:
+
+```sh
+npm run build:android   # needs Android SDK + JDK 17
+```
+
+The resulting APK in `packages/client/android/app/build/outputs/apk/debug/`
+also reads `VITE_SERVER_URL` at build time. To target the Render server,
+set it before building: `VITE_SERVER_URL=https://domino-60x4.onrender.com npm run build:android`.

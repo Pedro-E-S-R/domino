@@ -11,7 +11,7 @@ import type {
   TileId,
 } from '@domino/contracts';
 import { createGameSocket, type GameSocket } from './socket.js';
-import { getOrCreateSession } from './session.js';
+import { clearStoredSession, getOrCreateSession } from './session.js';
 
 export type Screen = 'home' | 'create' | 'join' | 'lobby' | 'game' | 'end' | 'rules';
 
@@ -117,6 +117,12 @@ export function useOnlineSession(
   });
   const [socket, setSocket] = useState<GameSocket | null>(null);
   const socketRef = useRef<GameSocket | null>(null);
+  const retryRef = useRef<number>(0);
+  const [retryNonce, setRetryNonce] = useState<number>(0);
+
+  useEffect(() => {
+    retryRef.current = 0;
+  }, [serverUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,6 +138,12 @@ export function useOnlineSession(
         s.on('disconnect', () => dispatch({ type: 'DISCONNECTED' }));
         s.on('connect_error', (err: Error) => {
           const msg = err?.message ?? 'erro desconhecido';
+          if (msg === 'INVALID_PAYLOAD' && retryRef.current < 1) {
+            retryRef.current += 1;
+            clearStoredSession().catch(() => {});
+            setRetryNonce((n) => n + 1);
+            return;
+          }
           dispatch({
             type: 'ERROR_TOAST',
             message: `Não conseguiu conectar em ${serverUrl}: ${msg}. Verifique o endereço do servidor.`,
@@ -167,7 +179,7 @@ export function useOnlineSession(
       if (s) s.disconnect();
       socketRef.current = null;
     };
-  }, [serverUrl]);
+  }, [serverUrl, retryNonce]);
 
   const emit = useCallback((event: string, payload: unknown) => {
     const s = socketRef.current;

@@ -13,6 +13,7 @@ import { ServerConfigScreen } from './app/ServerConfigScreen.js';
 import { useOnlineSession } from './net/online-store.js';
 import { useOfflineGame } from './offline/useOfflineGame.js';
 import { resolveServerUrl } from './net/server-url.js';
+import { clearStoredSession } from './net/session.js';
 import './styles/index.css';
 
 type AppMode =
@@ -222,10 +223,12 @@ function App(): JSX.Element {
         <ServerConfigScreen
           currentUrl={serverUrl}
           onSave={(url) => {
+            clearStoredSession().catch(() => {});
             setServerUrl(url);
             goHome();
           }}
           onReset={() => {
+            clearStoredSession().catch(() => {});
             setServerUrl(resolveServerUrl());
           }}
           onBack={goHome}

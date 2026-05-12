@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#fecb97",
+                        "secondary-fixed-dim": "#efbd8a",
+                        "secondary-fixed": "#ffdcbc",
+                        "surface": "#f9faf5",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#414942",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#79542a",
+                        "primary-container": "#1b4d2e",
+                        "surface-container-highest": "#e1e3de",
+                        "outline-variant": "#c1c9bf",
+                        "on-primary-fixed": "#00210e",
+                        "surface-tint": "#376847",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#45260f",
+                        "on-primary-fixed-variant": "#1e5031",
+                        "inverse-surface": "#2e312e",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#9ed3aa",
+                        "on-tertiary-fixed-variant": "#623f25",
+                        "tertiary-fixed-dim": "#efbc9b",
+                        "inverse-on-surface": "#f0f1ec",
+                        "primary-fixed": "#b9efc5",
+                        "primary": "#00361a",
+                        "surface-bright": "#f9faf5",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#9ed3aa",
+                        "on-background": "#191c19",
+                        "on-secondary-fixed": "#2c1700",
+                        "on-tertiary-fixed": "#2f1502",
+                        "background": "#f9faf5",
+                        "tertiary-container": "#5e3c23",
+                        "surface-container-high": "#e7e9e4",
+                        "surface-container": "#edeee9",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e3de",
+                        "outline": "#717971",
+                        "tertiary-fixed": "#ffdcc6",
+                        "surface-dim": "#d9dbd6",
+                        "on-primary-container": "#89bd95",
+                        "on-secondary-fixed-variant": "#614018",
+                        "surface-container-low": "#f3f4ef",
+                        "secondary": "#7c572d",
+                        "on-tertiary-container": "#d7a787",
+                        "on-surface": "#191c19",
+                        "amber-gold": "#D4A574",
+                        "soft-cream": "#F5F0E8",
+                        "rich-wood": "#5C3A21"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "piece-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.wood-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDfRG5q3BjqadM1td-XCyB8H980rOXAddf8UJ2xdMc7bqJFAdCw2mbdUtxJ0v-mlpFu09zc1WgCXk0Y-rIAQKHl8s4P4V-j72t62BCwGU09Z3w44GeIfrIt-6C1qKXK5XYDwxoIPgpCq8iXiuTud-RQO0kAE4RiIaFZOn9-2HhArZF31seyeX0w3aYgDk3i06ammXTUlA3RuQfFFOjVmUJGAUW4ETnePK64_SnXXVkP_0h7jnP7uoja1uFNdVdAjXmihTrCAT217uU)
+    }
+.table-inner-shadow {
+    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.1)
+    }
+.domino-shadow {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3)
+    }
+.btn-active:active {
+    transform: scale(0.95);
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2)
+    }</style>
+</head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen relative overflow-hidden">
+<div class="fixed inset-0 wood-texture opacity-30 pointer-events-none z-0"></div>
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-20">
+<div class="absolute top-[10%] left-[5%] transform rotate-12 bg-[#FFFFF0] w-16 h-28 rounded-md domino-shadow border border-gray-200"></div>
+<div class="absolute top-[40%] right-[10%] transform -rotate-45 bg-[#FFFFF0] w-16 h-28 rounded-md domino-shadow border border-gray-200"></div>
+<div class="absolute bottom-[15%] left-[15%] transform rotate-[110deg] bg-[#FFFFF0] w-16 h-28 rounded-md domino-shadow border border-gray-200"></div>
+</div>
+<header class="relative z-10 w-full flex justify-between items-center px-margin-mobile md:px-margin-desktop py-unit bg-tertiary dark:bg-tertiary-container shadow-md border-b-4 border-tertiary-container rounded-b-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-secondary-fixed overflow-hidden bg-secondary-container">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU1NnUnO2Bf0_dC3cpxDO92GnJMr5Uo-Uvqc2ErCnPTStM5lCw3V7qr19nHdfJlWcIy6kawwBYdOPgPSYfnV5fAZBytPOxnf1HgiemWl1dSOwMaZ0vrbMQ6AmXOjJtE__FzUFIWXbBXWZny-gg2TUS6n6Q55lZGOODoqi5_fFGUdn-ROA8x4PeCmQ9EvFem8VDvrVF0dOH4RKCtRfUYffdhpssi9mMY2V312of_7RLaPb3dX6CQjAp61ETx3lJIgxgwFlpMpMli-M"/>
+</div>
+<span class="font-label-lg text-label-lg text-secondary-fixed">Dominó Boteco</span>
+</div>
+<button class="material-symbols-outlined text-secondary-fixed-dim opacity-80 hover:bg-tertiary-container transition-colors p-2 rounded-full">settings</button>
+</header>
+<main class="relative z-10 flex flex-col items-center justify-center px-margin-mobile pt-10 pb-24 min-h-[calc(100vh-140px)]">
+<div class="mb-12 flex flex-col items-center animate-fade-in">
+<div class="w-48 h-48 md:w-64 md:h-64 mb-6">
+<img alt="Dominó Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3YUpqIybtOV6cSsmHF0OEdOpfdq-X55IbL7_D2vHNkBxiNl2aNO897rz6fy15zMKWGS_CJ5PsPd4M2qVQelK2gh3M207kBC0bv9gYCirEAVcgj5HvLU4weNnLdlHsAbOA0Vj4LJsnUtOepY8SwOEJR5HE26xkVf963Iaa2-nwuCDItsEzsJ-2C363bIkPFDy9EDFhLVgxUKnvwkNIOuGXPreoHEm_QcrQgTsIVfPar3Z6kOfREAtNazWCBVSOD3TGQT8qzBx_Fzc"/>
+</div>
+<h1 class="font-display-lg text-display-lg font-black text-rich-wood tracking-tight drop-shadow-sm">Dominó</h1>
+<p class="font-body-lg text-body-lg text-secondary italic opacity-80">A tradição do boteco na sua tela</p>
+</div>
+<div class="w-full max-w-sm flex flex-col gap-5">
+<button class="w-full py-5 rounded-xl bg-gradient-to-b from-[#E5B584] to-amber-gold border-b-4 border-[#A67C4E] shadow-lg flex items-center justify-center gap-3 text-white font-headline-md text-headline-md group transition-all btn-active">
+<span class="material-symbols-outlined" data-weight="fill">add_circle</span>
+                Criar Partida
+            </button>
+<button class="w-full py-5 rounded-xl bg-gradient-to-b from-[#E5B584] to-amber-gold border-b-4 border-[#A67C4E] shadow-lg flex items-center justify-center gap-3 text-white font-headline-md text-headline-md group transition-all btn-active">
+<span class="material-symbols-outlined" data-weight="fill">meeting_room</span>
+                Entrar em Partida
+            </button>
+<button class="w-full py-5 rounded-xl bg-gradient-to-b from-primary-container to-primary border-b-4 border-[#00210e] shadow-lg flex items-center justify-center gap-3 text-white font-headline-md text-headline-md group transition-all btn-active">
+<span class="material-symbols-outlined" data-weight="fill">sports_esports</span>
+                Jogar Offline
+            </button>
+</div>
+<div class="mt-12 flex gap-4 overflow-x-auto pb-4 max-w-full no-scrollbar">
+<div class="flex-shrink-0 flex items-center gap-2 bg-soft-cream border-2 border-rich-wood/20 px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-rich-wood">stars</span>
+<span class="font-label-lg text-label-lg text-rich-wood">Level 14</span>
+</div>
+<div class="flex-shrink-0 flex items-center gap-2 bg-soft-cream border-2 border-rich-wood/20 px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-amber-gold">workspace_premium</span>
+<span class="font-label-lg text-label-lg text-rich-wood">1.240 Pontos</span>
+</div>
+<div class="flex-shrink-0 flex items-center gap-2 bg-soft-cream border-2 border-rich-wood/20 px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-green-700">emoji_events</span>
+<span class="font-label-lg text-label-lg text-rich-wood">58 Vitórias</span>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-tertiary dark:bg-tertiary-container border-t-4 border-tertiary-container shadow-[0px_-4px_12px_rgba(0,0,0,0.4)] rounded-t-xl py-4 px-gutter flex justify-around items-center">
+<a class="flex flex-col items-center justify-center text-secondary-fixed font-bold bg-secondary-container rounded-xl px-4 py-1 shadow-inner translate-y-0.5" href="#">
+<span class="material-symbols-outlined" data-weight="fill">play_circle</span>
+<span class="font-label-sm text-label-sm">Jogar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-all" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-sm text-label-sm">Regras</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-all" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-label-sm text-label-sm">Placar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</a>
+</footer>
+<div class="fixed top-0 right-0 p-margin-desktop hidden md:block">
+<div class="bg-soft-cream p-6 rounded-2xl border-4 border-rich-wood shadow-xl max-w-[280px]">
+<h3 class="font-headline-md text-headline-md text-rich-wood mb-4 border-b border-rich-wood/10 pb-2">Últimos Jogos</h3>
+<ul class="space-y-4">
+<li class="flex justify-between items-center bg-white/50 p-2 rounded-lg">
+<span class="font-label-lg text-green-700">Vitória</span>
+<span class="font-body-md text-rich-wood">42 - 18</span>
+</li>
+<li class="flex justify-between items-center bg-white/50 p-2 rounded-lg">
+<span class="font-label-lg text-error">Derrota</span>
+<span class="font-body-md text-rich-wood">15 - 32</span>
+</li>
+</ul>
+<a class="block text-center mt-4 text-secondary font-label-lg hover:underline transition-all" href="#">Ver Histórico Completo</a>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,20 @@
+# Contexto de Design — Dominó
+
+## Fonte do design
+Os mockups visuais estão em `design/stitch/`. Foram gerados pelo Google Stitch 
+e representam a referência canônica de UI/UX do projeto.
+
+## Telas mapeadas
+- dentro de design está as pastas necessárias para inspiração
+
+## Diretrizes derivadas do design
+- Paleta primária: verde-floresta (#1B4D2E), âmbar (#D4A574), creme (#F5F0E8)
+- Tipografia: Inter/Poppins, bold em títulos
+- Estilo: aconchegante, mesa de bar brasileiro, sombras suaves
+- Mobile-first, orientação retrato
+
+## Como usar
+Qualquer implementação de componente de UI DEVE consultar primeiro o HTML 
+correspondente em `design/stitch/`. Cores, tipografia e espaçamentos vêm de lá.
+Se houver conflito entre design e código, o design ganha — abra uma 
+issue/discussão antes de divergir.

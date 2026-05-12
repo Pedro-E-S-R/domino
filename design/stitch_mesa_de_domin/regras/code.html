@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dominó Boteco - Regras do Jogo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#fecb97",
+                        "secondary-fixed-dim": "#efbd8a",
+                        "secondary-fixed": "#ffdcbc",
+                        "surface": "#f9faf5",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#414942",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#79542a",
+                        "primary-container": "#1b4d2e",
+                        "surface-container-highest": "#e1e3de",
+                        "outline-variant": "#c1c9bf",
+                        "on-primary-fixed": "#00210e",
+                        "surface-tint": "#376847",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#45260f",
+                        "on-primary-fixed-variant": "#1e5031",
+                        "inverse-surface": "#2e312e",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#9ed3aa",
+                        "on-tertiary-fixed-variant": "#623f25",
+                        "tertiary-fixed-dim": "#efbc9b",
+                        "inverse-on-surface": "#f0f1ec",
+                        "primary-fixed": "#b9efc5",
+                        "primary": "#00361a",
+                        "surface-bright": "#f9faf5",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#9ed3aa",
+                        "on-background": "#191c19",
+                        "on-secondary-fixed": "#2c1700",
+                        "on-tertiary-fixed": "#2f1502",
+                        "background": "#f9faf5",
+                        "tertiary-container": "#5e3c23",
+                        "surface-container-high": "#e7e9e4",
+                        "surface-container": "#edeee9",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e3de",
+                        "outline": "#717971",
+                        "tertiary-fixed": "#ffdcc6",
+                        "surface-dim": "#d9dbd6",
+                        "on-primary-container": "#89bd95",
+                        "on-secondary-fixed-variant": "#614018",
+                        "surface-container-low": "#f3f4ef",
+                        "secondary": "#7c572d",
+                        "on-tertiary-container": "#d7a787",
+                        "on-surface": "#191c19"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "piece-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .felt-texture {
+            background-color: #1b4d2e;
+            background-image: radial-gradient(#24613b 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .wood-border {
+            border: 8px solid #5C3A21;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .domino-ivory {
+            background: #FFFFF0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .domino-ivory::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 1px;
+            background: #D4A574;
+            transform: translateY(-50%);
+        }
+        .pip {
+            background: #000080;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col items-center justify-center p-4 felt-texture">
+<!-- Top Navigation Anchor (Simulated from JSON) -->
+<header class="fixed top-0 left-0 w-full z-40">
+<div class="bg-tertiary dark:bg-tertiary-container shadow-[0px_4px_10px_rgba(0,0,0,0.3)] border-b-4 border-tertiary-container flex justify-between items-center px-margin-mobile md:px-margin-desktop py-unit w-full rounded-b-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-secondary-fixed overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl2mQC-FKd_JEKRcOE727obNjKg7incVqQh8yHzkZoTpzUibkcysPNTiJkc31gh8GlTxgSgfCj9a_UMZHmDCFHYnO-HuhE9R27LbBOD7fvqo025wChNPp6Fa4HzH_u5p6e47l3CgiswK4oBe0tBs_ZbAEISwW1NGuKHF6ILq9pAPMFsg44Q0qWvXykdRqRbj73GQNIGadWN5QhNLDVNoGcuLUcFgBnwIvqCjVp0XyUgX9d8nnu96rHpGGDL-IrgswpSU1A9ZBZlWc"/>
+</div>
+<h1 class="font-display-lg text-display-lg font-black text-secondary-fixed tracking-tight leading-none text-[24px]">Dominó Boteco</h1>
+</div>
+<button class="text-secondary-fixed hover:bg-tertiary-container transition-colors p-2 rounded-lg">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Rules Modal Container -->
+<div class="relative w-full max-w-2xl bg-[#F5F0E8] wood-border rounded-2xl overflow-hidden flex flex-col max-h-[751px] mt-16 mb-20">
+<!-- Modal Header -->
+<div class="p-6 border-b-2 border-outline-variant flex justify-between items-center bg-[#F5F0E8]">
+<h2 class="font-headline-lg text-headline-lg text-tertiary">Regras do Jogo</h2>
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-transform active:scale-95 duration-150">
+<span class="material-symbols-outlined text-tertiary font-bold" data-icon="close">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 scroll-smooth">
+<!-- Intro Section -->
+<section class="space-y-4">
+<p class="font-body-lg text-body-lg text-on-surface">
+                    O Dominó é um clássico dos botecos brasileiros. Esta versão segue a modalidade <span class="text-primary font-bold">Double-Six</span> (Sena), jogada com 28 peças.
+                </p>
+</section>
+<!-- Goal Section -->
+<section class="space-y-3">
+<h3 class="font-headline-md text-headline-md text-secondary">Objetivo</h3>
+<p class="text-on-surface-variant">
+                    O objetivo é ser o primeiro jogador (ou dupla) a baixar todas as suas peças ou ter a menor pontuação total caso o jogo "feche".
+                </p>
+</section>
+<!-- Starting Section -->
+<section class="space-y-3">
+<h3 class="font-headline-md text-headline-md text-secondary">Início da Partida</h3>
+<ul class="list-disc pl-5 space-y-2 text-on-surface-variant">
+<li>Cada jogador recebe 7 peças aleatórias.</li>
+<li>O jogador que possuir a peça <strong>6-6 (Ducha)</strong> começa a partida.</li>
+<li>Se ninguém tiver a sena, começa quem tiver o maior duplo.</li>
+</ul>
+</section>
+<!-- Diagrams Section -->
+<section class="space-y-6">
+<h3 class="font-headline-md text-headline-md text-secondary">Como Jogar</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Valid Play -->
+<div class="bg-primary-container p-4 rounded-xl border-2 border-primary space-y-4">
+<span class="inline-block px-3 py-1 bg-primary text-white text-xs font-bold rounded-full uppercase tracking-wider">Válido</span>
+<div class="flex items-center justify-center gap-piece-gap py-4">
+<!-- Piece 1 (3-2) -->
+<div class="domino-ivory w-12 h-20 rounded-lg flex flex-col items-center justify-around p-1">
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="col-span-2 flex justify-center"><div class="pip w-2 h-2 rounded-full"></div></div>
+</div>
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+</div>
+</div>
+<!-- Piece 2 (2-5) connected -->
+<div class="domino-ivory w-12 h-20 rounded-lg flex flex-col items-center justify-around p-1">
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+</div>
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="col-span-2 flex justify-center"><div class="pip w-2 h-2 rounded-full"></div></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+</div>
+</div>
+</div>
+<p class="text-on-primary-container text-sm text-center font-medium">As extremidades devem ter o mesmo número de pontos.</p>
+</div>
+<!-- Invalid Play -->
+<div class="bg-error-container p-4 rounded-xl border-2 border-error space-y-4">
+<span class="inline-block px-3 py-1 bg-error text-white text-xs font-bold rounded-full uppercase tracking-wider">Inválido</span>
+<div class="flex items-center justify-center gap-piece-gap py-4">
+<!-- Piece 1 (4-1) -->
+<div class="domino-ivory w-12 h-20 rounded-lg flex flex-col items-center justify-around p-1">
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+</div>
+<div class="pip w-2 h-2 rounded-full"></div>
+</div>
+<!-- Piece 2 (3-3) non-matching -->
+<div class="domino-ivory w-12 h-20 rounded-lg flex flex-col items-center justify-around p-1 opacity-60">
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="col-span-2 flex justify-center"><div class="pip w-2 h-2 rounded-full"></div></div>
+</div>
+<div class="grid grid-cols-2 gap-1">
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="pip w-2 h-2 rounded-full"></div>
+<div class="col-span-2 flex justify-center"><div class="pip w-2 h-2 rounded-full"></div></div>
+</div>
+</div>
+</div>
+<p class="text-on-error-container text-sm text-center font-medium">Não é permitido conectar números diferentes.</p>
+</div>
+</div>
+</section>
+<!-- Closing Section -->
+<section class="space-y-3 pb-8">
+<h3 class="font-headline-md text-headline-md text-secondary">Fechamento e Pontuação</h3>
+<p class="text-on-surface-variant">
+                    Se nenhum jogador puder jogar e ainda houver peças na mão, o jogo está "fechado". Vence quem tiver a menor soma de pontos nas mãos.
+                </p>
+<div class="p-4 bg-tertiary-fixed rounded-xl border border-secondary-container">
+<p class="text-on-tertiary-fixed-variant font-bold flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+                        Dica de Boteco:
+                    </p>
+<p class="text-on-tertiary-fixed-variant text-sm mt-1 italic">
+                        "Bater" com uma sena ou com o seu último duplo garante o dobro de prestígio na mesa!
+                    </p>
+</div>
+</section>
+</div>
+<!-- Modal Footer -->
+<div class="p-6 border-t-2 border-outline-variant bg-surface-container-low flex justify-end">
+<button class="bg-tertiary text-white px-8 py-3 rounded-full font-label-lg hover:bg-tertiary-container transition-all active:scale-95 shadow-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle">check_circle</span>
+                Entendi as Regras
+            </button>
+</div>
+</div>
+<!-- Bottom Navigation (Simulated from JSON) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center py-2 px-gutter bg-tertiary dark:bg-tertiary-container rounded-t-xl border-t-4 border-tertiary-container shadow-[0px_-4px_12px_rgba(0,0,0,0.4)] z-50">
+<button class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-all">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+<span class="font-label-sm text-label-sm">Jogar</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-all">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-all">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-sm text-label-sm">Placar</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 shadow-inner translate-y-0.5 transition-all">
+<span class="material-symbols-outlined" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-sm text-label-sm">Regras</span>
+</button>
+</nav>
+<!-- Visual Hint of the Table Background -->
+<div class="fixed inset-0 -z-10 felt-texture opacity-80">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle,transparent_20%,rgba(0,0,0,0.4)_100%)]"></div>
+</div>
+</body></html>

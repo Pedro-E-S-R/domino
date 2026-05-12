@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dominó Boteco - Entrar na Sala</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#fecb97",
+                        "secondary-fixed-dim": "#efbd8a",
+                        "secondary-fixed": "#ffdcbc",
+                        "surface": "#f9faf5",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#414942",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#79542a",
+                        "primary-container": "#1b4d2e",
+                        "surface-container-highest": "#e1e3de",
+                        "outline-variant": "#c1c9bf",
+                        "on-primary-fixed": "#00210e",
+                        "surface-tint": "#376847",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#45260f",
+                        "on-primary-fixed-variant": "#1e5031",
+                        "inverse-surface": "#2e312e",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#9ed3aa",
+                        "on-tertiary-fixed-variant": "#623f25",
+                        "tertiary-fixed-dim": "#efbc9b",
+                        "inverse-on-surface": "#f0f1ec",
+                        "primary-fixed": "#b9efc5",
+                        "primary": "#00361a",
+                        "surface-bright": "#f9faf5",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#9ed3aa",
+                        "on-background": "#191c19",
+                        "on-secondary-fixed": "#2c1700",
+                        "on-tertiary-fixed": "#2f1502",
+                        "background": "#f9faf5",
+                        "tertiary-container": "#5e3c23",
+                        "surface-container-high": "#e7e9e4",
+                        "surface-container": "#edeee9",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e3de",
+                        "outline": "#717971",
+                        "tertiary-fixed": "#ffdcc6",
+                        "surface-dim": "#d9dbd6",
+                        "on-primary-container": "#89bd95",
+                        "on-secondary-fixed-variant": "#614018",
+                        "surface-container-low": "#f3f4ef",
+                        "secondary": "#7c572d",
+                        "on-tertiary-container": "#d7a787",
+                        "on-surface": "#191c19"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "piece-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.wood-texture {
+    background-image: linear-gradient(rgba(92, 58, 33, 0.9), rgba(92, 58, 33, 0.9)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuA65hSf4Pc1PZtfbg6Um42WfFZlJZOrSKdOiGLFpvez-R2r3SdCYV2SCpE6c40s6chhMyLnulc501FdJ4EM0dJgEmrB2_hSn-TkHydSjxdcMYQWhrfct6svfedRWn1Wj3PderdqoXpzxzAmTLt0wEVKQX8fGvARk4Llg4HjcgOgKV4wxB98w1KfaHHNSfe7QH-nNYYpdPk-3a0Dgk3HqkTKq-GeA87xAjvkYF8LLL227FQDGLUmULU52AjXZJgb47q27bYp5QK60Vk)
+    }
+.felt-surface {
+    background-color: #1B4D2E;
+    background-image: radial-gradient(circle at center, #24633b 0%, #1B4D2E 100%);
+    box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5)
+    }
+.ivory-tile {
+    background-color: #FFFFF0;
+    background-image: linear-gradient(145deg, #fff 0%, #FFFFF0 100%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-bottom: 3px solid #e0e0d0
+    }
+.tile-pip {
+    background-color: #000080;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-md text-on-surface min-h-screen">
+<!-- Top Navigation Anchor -->
+<header class="bg-tertiary dark:bg-tertiary-container text-secondary-fixed dark:text-secondary-fixed-dim font-headline-md text-headline-md docked full-width top-0 rounded-b-xl shadow-[0px_4px_10px_rgba(0,0,0,0.3)] border-b-4 border-tertiary-container z-50 fixed w-full">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-unit w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-secondary-fixed overflow-hidden bg-tertiary-container">
+<img alt="User profile" data-alt="A professional close-up headshot of a person for a user profile avatar. The lighting is soft and warm, casting gentle shadows that give a premium, tactile feel. The background is a blurred wooden texture, maintaining the boteco aesthetic with a rich palette of deep browns and amber tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR83qs0WKU610xP84yW_BjaeAJqpHD7hJiNlYBu0dCm2LuHGqwAWOH8TyT_rljklZpgBkbv9yGLj7p1Amp0gnuOu0XeLZScVe0Xxry3RUIWCHJgNp_iv0J9AoU6LKEBQZ2Wbh-LP2w4kdO8tsqQKOC6NCtnhwfsneUR3XGXfHDp4dTD2igM8UrriX45QtC_4-yxjgobrUMpxugZ4P606H2m_75Ps6GHODGGs8dJWj-U-FwtgGuUJH42-sOXpP9bqPjbyhVGJT6_pg"/>
+</div>
+<h1 class="font-display-lg text-[24px] font-black text-secondary-fixed tracking-tight">Dominó Boteco</h1>
+</div>
+<div class="flex gap-4 items-center">
+<button class="text-secondary-fixed font-bold hover:bg-tertiary-container p-2 rounded-lg transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-lg mx-auto space-y-8 min-h-screen flex flex-col justify-center">
+<!-- Join Section Hero -->
+<section class="text-center space-y-4">
+<h2 class="font-headline-lg text-headline-lg text-tertiary">Entrar na Sala</h2>
+<p class="font-body-md text-on-surface-variant">Digite o código de 6 dígitos para começar a partida com seus amigos.</p>
+</section>
+<!-- Room Code Input Area -->
+<div class="space-y-6">
+<div class="flex justify-center gap-2 md:gap-3">
+<!-- 6 Individual Digit Boxes mimicking tiles -->
+<div class="w-12 h-16 md:w-16 md:h-20 ivory-tile rounded-lg flex items-center justify-center font-display-lg text-tertiary border-2 border-outline-variant">8</div>
+<div class="w-12 h-16 md:w-16 md:h-20 ivory-tile rounded-lg flex items-center justify-center font-display-lg text-tertiary border-2 border-outline-variant">2</div>
+<div class="w-12 h-16 md:w-16 md:h-20 ivory-tile rounded-lg flex items-center justify-center font-display-lg text-tertiary border-2 border-outline-variant">5</div>
+<div class="w-12 h-16 md:w-16 md:h-20 ivory-tile rounded-lg flex items-center justify-center font-display-lg text-tertiary border-2 border-outline-variant">_</div>
+<div class="w-12 h-16 md:w-16 md:h-20 ivory-tile rounded-lg flex items-center justify-center font-display-lg text-tertiary border-2 border-outline-variant opacity-40">_</div>
+<div class="w-12 h-16 md:w-16 md:h-20 ivory-tile rounded-lg flex items-center justify-center font-display-lg text-tertiary border-2 border-outline-variant opacity-40">_</div>
+</div>
+<!-- Numeric Pad (Custom) -->
+<div class="bg-surface-container rounded-3xl p-6 shadow-md border-t-2 border-surface-container-highest">
+<div class="grid grid-cols-3 gap-3">
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">1</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">2</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">3</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">4</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">5</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">6</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">7</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">8</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">9</button>
+<button class="py-4 text-tertiary font-bold hover:bg-surface-container-high rounded-xl">
+<span class="material-symbols-outlined text-[32px]">backspace</span>
+</button>
+<button class="ivory-tile py-4 rounded-xl font-headline-md text-tertiary active:scale-95 transition-transform">0</button>
+<button class="bg-primary-container text-on-primary-container py-4 rounded-xl font-bold flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[32px]">check</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Scan QR Button -->
+<button class="w-full bg-secondary text-on-secondary font-label-lg py-4 rounded-xl shadow-md flex items-center justify-center gap-3 active:scale-95 transition-transform border-b-4 border-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+            Escanear QR Code
+        </button>
+<!-- Salas Recentes Section -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-label-lg text-tertiary">Salas Recentes</h3>
+<span class="material-symbols-outlined text-secondary opacity-60">history</span>
+</div>
+<div class="space-y-3">
+<!-- Recent Room Item 1 -->
+<div class="bg-surface-container-low p-4 rounded-2xl flex items-center justify-between border border-outline-variant hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl wood-texture flex items-center justify-center text-secondary-fixed shadow-sm">
+<span class="material-symbols-outlined">meeting_room</span>
+</div>
+<div>
+<p class="font-label-lg text-on-surface">Sala #825-103</p>
+<p class="font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">group</span> 3/4 Jogadores
+                            </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+<!-- Recent Room Item 2 -->
+<div class="bg-surface-container-low p-4 rounded-2xl flex items-center justify-between border border-outline-variant hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl wood-texture flex items-center justify-center text-secondary-fixed shadow-sm">
+<span class="material-symbols-outlined">meeting_room</span>
+</div>
+<div>
+<p class="font-label-lg text-on-surface">Sala #442-991</p>
+<p class="font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">group</span> 1/4 Jogadores
+                            </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full bg-tertiary dark:bg-tertiary-container py-2 px-gutter flex justify-around items-center rounded-t-xl shadow-[0px_-4px_12px_rgba(0,0,0,0.4)] border-t-4 border-tertiary-container z-50">
+<!-- Jogar Active State -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 shadow-inner translate-y-0.5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span class="font-label-sm text-label-sm">Jogar</span>
+</a>
+<!-- Amigos Inactive State -->
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</a>
+<!-- Placar Inactive State -->
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-sm text-label-sm">Placar</span>
+</a>
+<!-- Regras Inactive State -->
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-sm text-label-sm">Regras</span>
+</a>
+</nav>
+</body></html>

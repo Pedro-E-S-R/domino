@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#fecb97",
+                    "secondary-fixed-dim": "#efbd8a",
+                    "secondary-fixed": "#ffdcbc",
+                    "surface": "#f9faf5",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#414942",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#79542a",
+                    "primary-container": "#1b4d2e",
+                    "surface-container-highest": "#e1e3de",
+                    "outline-variant": "#c1c9bf",
+                    "on-primary-fixed": "#00210e",
+                    "surface-tint": "#376847",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#45260f",
+                    "on-primary-fixed-variant": "#1e5031",
+                    "inverse-surface": "#2e312e",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#9ed3aa",
+                    "on-tertiary-fixed-variant": "#623f25",
+                    "tertiary-fixed-dim": "#efbc9b",
+                    "inverse-on-surface": "#f0f1ec",
+                    "primary-fixed": "#b9efc5",
+                    "primary": "#00361a",
+                    "surface-bright": "#f9faf5",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#9ed3aa",
+                    "on-background": "#191c19",
+                    "on-secondary-fixed": "#2c1700",
+                    "on-tertiary-fixed": "#2f1502",
+                    "background": "#f9faf5",
+                    "tertiary-container": "#5e3c23",
+                    "surface-container-high": "#e7e9e4",
+                    "surface-container": "#edeee9",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e1e3de",
+                    "outline": "#717971",
+                    "tertiary-fixed": "#ffdcc6",
+                    "surface-dim": "#d9dbd6",
+                    "on-primary-container": "#89bd95",
+                    "on-secondary-fixed-variant": "#614018",
+                    "surface-container-low": "#f3f4ef",
+                    "secondary": "#7c572d",
+                    "on-tertiary-container": "#d7a787",
+                    "on-surface": "#191c19"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "margin-mobile": "20px",
+                    "unit": "8px",
+                    "margin-desktop": "40px",
+                    "piece-gap": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-lg": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .wood-texture {
+            background-color: #5C3A21;
+            background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .felt-table {
+            background: radial-gradient(circle, #1B4D2E 0%, #00361A 100%);
+        }
+        .domino-tile {
+            background: linear-gradient(145deg, #FFFFF0, #F5F5DC);
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3), inset 0px 1px 0px rgba(255,255,255,0.5);
+        }
+        .amber-gold-btn {
+            background: linear-gradient(to bottom, #EBC08D, #D4A574);
+            box-shadow: 0 4px 0 #8E6E4D;
+        }
+        .amber-gold-btn:active {
+            box-shadow: 0 1px 0 #8E6E4D;
+            transform: translateY(3px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-md text-on-background min-h-screen flex flex-col items-center">
+<header class="docked full-width top-0 rounded-b-xl bg-tertiary dark:bg-tertiary-container shadow-[0px_4px_10px_rgba(0,0,0,0.3)] border-b-4 border-tertiary-container flex justify-between items-center px-margin-mobile md:px-margin-desktop py-unit w-full z-50">
+<div class="flex items-center gap-unit">
+<div class="w-10 h-10 rounded-full border-2 border-secondary-fixed overflow-hidden bg-surface-container">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhPZ3KCiPEF2Bsr8B81by9nRu7BZYEEgnoIvuKrpi4BvBga2CZ8Caitsrgjt6vjgV0urB1H1UxxW1LrCvDQTLi81Kw2MLqGvEf_lTk950Yv--QLw3BKV01yAIUHDuiVG878u2EVrqFGIZCkdWlyZKIGwFlTAt9gBWrgMLjuxTZ5_29ic4TPV_nsry66wbO0qB85KTCl9iuIAB5WUH9jcDCy50M4C5EX1V9uPsv85gz9YYdUdOaiuo7u3N3jrGNJtWzeuRCSO_evcY"/>
+</div>
+<h1 class="font-display-lg text-[24px] md:text-display-lg font-black text-secondary-fixed tracking-tight">Dominó Boteco</h1>
+</div>
+<button class="text-secondary-fixed hover:bg-tertiary-container transition-colors p-2 rounded-lg active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="flex-grow w-full flex items-center justify-center p-gutter relative overflow-hidden">
+<div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+<div class="absolute top-10 left-10 transform -rotate-12 opacity-40">
+<div class="domino-tile w-16 h-32 rounded-lg flex flex-col items-center justify-between py-4 border border-outline-variant">
+<div class="grid grid-cols-3 gap-1"><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div></div>
+<div class="w-full h-[1px] bg-[#D4A574]"></div>
+<div class="grid grid-cols-3 gap-1"><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div></div>
+</div>
+</div>
+<div class="absolute bottom-20 right-10 transform rotate-45 opacity-40">
+<div class="domino-tile w-16 h-32 rounded-lg flex flex-col items-center justify-between py-4 border border-outline-variant">
+<div class="grid grid-cols-3 gap-1"><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div></div>
+<div class="w-full h-[1px] bg-[#D4A574]"></div>
+<div class="grid grid-cols-3 gap-1"><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div><div class="w-2 h-2 rounded-full bg-[#000080]"></div></div>
+</div>
+</div>
+</div>
+<section class="max-w-2xl w-full bg-surface-container-low rounded-[2rem] border-[12px] border-tertiary-container shadow-2xl z-10 flex flex-col items-center p-8 md:p-12 relative overflow-hidden">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-2 bg-secondary-container"></div>
+<div class="mb-8 text-center">
+<span class="inline-block px-4 py-1 bg-primary-container text-on-primary-container rounded-full font-label-lg text-label-lg mb-4">PARTIDA ENCERRADA</span>
+<h2 class="font-display-lg text-display-lg text-on-tertiary-container drop-shadow-sm">Você Venceu!</h2>
+<div class="flex justify-center gap-2 mt-4">
+<span class="material-symbols-outlined text-[#FFD700] text-4xl animate-bounce">celebration</span>
+<span class="material-symbols-outlined text-[#FFD700] text-4xl animate-bounce" style="animation-delay: 0.1s">celebration</span>
+<span class="material-symbols-outlined text-[#FFD700] text-4xl animate-bounce" style="animation-delay: 0.2s">celebration</span>
+</div>
+</div>
+<div class="w-full bg-tertiary rounded-2xl p-6 shadow-inner border border-tertiary-container mb-10">
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center justify-between bg-surface-container-high rounded-xl p-4 border-l-8 border-primary-container">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full border-2 border-primary-container p-1 bg-surface">
+<img alt="Winner Avatar" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2kePA0ZFZkcGh8PILlJKbvTCpCqveRq2fgS71AtSWyHmCZqM19zFpWDNtAQ9wLlM4ixBtbxH8_LySdrpMgKUiDAXYWXpTrZD00dM8eII2yFdscBxTIVXiASXKoV8h4tRLqoWssq3AOvpivOtOLUt-lJSW4BMMzyGV-rZaPfSfK0kHvUUu-9x-tA6Mw62zliTmPcoiD_1hr_jedOvISaUshTTMsDWdPmOmewQrGS84oHn-JDAOQhe8GHxSzYl-JFA-PQ8CL4HDkGI"/>
+</div>
+<div>
+<p class="font-headline-md text-headline-md text-tertiary">Você (Léo)</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Vencedor</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-display-lg text-headline-lg text-primary">0</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">PONTOS RESTANTES</p>
+</div>
+</div>
+<div class="flex items-center justify-between bg-surface-container-high/60 rounded-xl p-4">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full border-2 border-outline-variant p-1 bg-surface opacity-80">
+<img alt="Opponent Avatar" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr-UTmLOzGIQWi61gqIX-QIp6varYIJDXy-WjLwFtBkYNCs2hYd3XGjW00vBFptmpqFYR4N6be2IsiBrSPIdilx--PmqufnzyFT3C_xmOXBfmzNYBUdtgfCYkH1uh8Nm9G-SFY0oy0vgj8axOF9gW9I7eKciavJPYoIP95DjWYXk_G0BcYEBkFy8nEnVjpr9Nf8zPRoLj5ZYxvo4e0YlvrSCMFv8jql7JOQYoT30594pVnMMES59vdLcW9wwvC99QczM91kobPtsM"/>
+</div>
+<div>
+<p class="font-headline-md text-headline-md text-tertiary-container opacity-80">Zeca Pagodinho</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">2º LUGAR</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-display-lg text-headline-lg text-tertiary-container">12</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">PONTOS RESTANTES</p>
+</div>
+</div>
+<div class="flex items-center justify-between bg-surface-container-high/60 rounded-xl p-4">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full border-2 border-outline-variant p-1 bg-surface opacity-80">
+<img alt="Opponent Avatar" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-IauI-3vkcxyDPi93lx7l_5ASObHUUPiHxvCaD178nMoiwvchoJOWgceQtwozJUMhQvfSBPkPqp6sHvAvmb44Ban3UkZ9xDtStVoFjtfY6-WF2g3xctTA4kdttIq8VuqbpX8dJ2ibhpfk_nfeFRb-GVXxqNMYXoy58E_4MqQYEs5clFiUuEcePDN8_Gfq-2xi5gt0uCId92kAAhxZBq1CovL70pGRdLMeiZxIgqmpYx_mfggHo2WOipDFhJa245PI9KhMO-fjhHs"/>
+</div>
+<div>
+<p class="font-headline-md text-headline-md text-tertiary-container opacity-80">Dona Betânia</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">3º LUGAR</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-display-lg text-headline-lg text-tertiary-container">24</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">PONTOS RESTANTES</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row gap-4 w-full">
+<button class="amber-gold-btn flex-1 py-5 rounded-2xl text-on-secondary-container font-headline-md text-headline-md transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">replay</span>
+                    Jogar Novamente
+                </button>
+<button class="flex-1 py-5 rounded-2xl border-4 border-secondary text-secondary font-headline-md text-headline-md hover:bg-secondary-fixed transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">home</span>
+                    Voltar ao Início
+                </button>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-tertiary dark:bg-tertiary-container shadow-[0px_-4px_12px_rgba(0,0,0,0.4)] border-t-4 border-tertiary-container flex justify-around items-center py-2 px-gutter z-50">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 shadow-inner translate-y-0.5 transition-all" href="#">
+<span class="material-symbols-outlined" data-weight="fill">play_circle</span>
+<span class="font-label-sm text-label-sm">Jogar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-label-sm text-label-sm">Placar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim opacity-70 px-4 py-1 hover:opacity-100 hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-sm text-label-sm">Regras</span>
+</a>
+</nav>
+<div class="fixed inset-0 pointer-events-none z-0">
+<img alt="" class="w-full h-full object-cover opacity-10 mix-blend-overlay" data-alt="A macro photography style background texture of high-quality polished Brazilian mahogany wood. The surface shows fine organic grain patterns and deep rich brown colors. Soft warm lighting illuminates the texture from the side, creating a cozy and premium boteco atmosphere. The image is designed to feel like a high-end gaming table surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmFwwdF0pFf7hgK0Ac5zofmMJu00VuKSU10JOq0xeEntNNMn0XonQem6Pv-ZocZJzJ12EI_u9Wc4YvwzMzC_Y3ILay8x-6NE8waGqNz_GtaClaZ1uLfuf_0QSw9dFDMxbuxveC67sX6B4TaOfPyplR1RIFBz6jo4ln54RghEkDjRgWXzrtSzrcxRBkNW2UXn13Xjy4r9dQhOLw6KIHMl-I79cMbfYXgW79G_NjPO2dxV9w2sgfWhs-H6MJNXqTgQe-faUJqGFrcAI"/>
+</div>
+</body></html>

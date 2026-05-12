@@ -9,6 +9,7 @@ export interface TileProps {
   size?: 'sm' | 'md' | 'lg';
   highlighted?: boolean;
   recent?: boolean;
+  endPosition?: boolean;
   disabled?: boolean;
   onClick?: () => void;
 }
@@ -71,6 +72,7 @@ export function Tile({
   size = 'md',
   highlighted = false,
   recent = false,
+  endPosition = false,
   disabled = false,
   onClick,
 }: TileProps): JSX.Element {
@@ -95,6 +97,7 @@ export function Tile({
       data-layout={layout}
       data-orientation={orientation}
       data-recent={recent ? 'true' : undefined}
+      data-end-position={endPosition ? 'true' : undefined}
       className={[
         'relative rounded-lg border bg-ivory-tile transition-all items-center justify-between',
         horizontal ? 'flex flex-row' : 'flex flex-col',
@@ -102,7 +105,9 @@ export function Tile({
           ? 'ring-4 ring-amber-gold scale-110 tile-playable-glow z-10 border-amber-gold/40'
           : recent
             ? 'ring-2 ring-amber-gold scale-105 shadow-[0_0_14px_rgba(212,165,116,0.85)] z-10 border-amber-gold'
-            : 'domino-shadow border-amber-gold/40',
+            : endPosition
+              ? 'ring-2 ring-amber-gold/45 domino-shadow border-amber-gold/60'
+              : 'domino-shadow border-amber-gold/40',
         disabled && !recent ? 'opacity-40 cursor-not-allowed' : '',
         !disabled || recent ? '' : 'cursor-not-allowed',
         !disabled ? 'cursor-pointer hover:scale-105' : '',

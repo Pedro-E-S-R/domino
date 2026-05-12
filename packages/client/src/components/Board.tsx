@@ -34,17 +34,21 @@ export function Board({
             ←{leftEnd}
           </div>
         )}
-        {board.map((laid, i) => (
-          <Tile
-            key={`${laid.tileId}-${i}`}
-            tileId={laid.tileId}
-            orientation={laid.orientation}
-            layout={boardLayoutFor(laid.tileId)}
-            size="sm"
-            disabled
-            recent={laid.tileId === recentTileId}
-          />
-        ))}
+        {board.map((laid, i) => {
+          const isEnd = i === 0 || i === board.length - 1;
+          return (
+            <Tile
+              key={`${laid.tileId}-${i}`}
+              tileId={laid.tileId}
+              orientation={laid.orientation}
+              layout={boardLayoutFor(laid.tileId)}
+              size="sm"
+              disabled
+              recent={laid.tileId === recentTileId}
+              endPosition={isEnd}
+            />
+          );
+        })}
         {rightEnd !== null && (
           <div className="text-soft-cream/80 font-label-sm" aria-hidden>
             {rightEnd}→
